@@ -1,0 +1,1321 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BinanceMapper</name>
+    </assembly>
+    <members>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Data.Enums.EventDeliveryPublicType">
+            <summary>
+            Название подписки
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Data.Enums.MarketDeliverySubType">
+            <summary>
+            Тип подписки
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Data.Enums.PublicDeliveryEndpointType">
+            <summary>
+            Типы публичной подписки 
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Events.DefaultPublicDeliveryEvent">
+            <summary>
+            Дефолтный ивент
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Events.OrderBookEvent">
+            <summary>
+            Респонс ордербук
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.MarketWS.Events.OrderBookEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Events.SymbolTickerEvent">
+            <summary>
+            Респонс Individual Symbol Ticker
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Events.TradeEvent">
+            <summary>
+            Респонс трейдов
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.IMarketStreamsDeliveryHandlerFactory">
+            <summary>
+            Интерфейс фабрики публичных запросов
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.MarketStreamsDeliveryHandlerFactory">
+            <summary>
+            Фабрика публичных запросов Спот
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.MarketWS.Subscriptions.DeliveryMarketCombineStreamsSubs">
+            <summary>
+            Статичный класс для подписки на все типы каналов (Быстрый сбор без хранения информации)
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Delivery.MarketWS.Subscriptions.DeliveryMarketCombineStreamsSubs.idStream">
+            <summary>
+            Поле идентификатора запроса  
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.MarketWS.Subscriptions.DeliveryMarketCombineStreamsSubs.IdentificatorStream">
+            <summary>
+            Основное свойство идентификатора запроса (Инкрементируется при каждом вызове метода без передачи id)
+            Возвращается истинное значение Id поэтому idStream = 1
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Delivery.MarketWS.Subscriptions.DeliveryMarketCombineStreamsSubs.CreatePublicSub(System.String,BinanceMapper.Delivery.MarketWS.Data.Enums.MarketDeliverySubType,BinanceMapper.Delivery.MarketWS.Data.Enums.PublicDeliveryEndpointType,System.Nullable{System.Int32})">
+            <summary>
+            Methode for [All]
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.Balance.Value">
+            <summary>
+            Wallet balance
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.Balance.CrossValue">
+            <summary>
+            Cross wallet balance
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.MarginCallPosition.MarginType">
+            <summary>
+            Margin type
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.MarginCallPosition.IsolatedWalletBalance">
+            <summary>
+            Isolated wallet (if isolated position)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.OrderExecutionPayload.CommissionAsset">
+            <summary>
+            Will not push if no commission
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.OrderExecutionPayload.CommissionAmount">
+            <summary>
+            Will not push if no commission
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.OrderExecutionPayload.IsClosePosition">
+            <summary>
+            If Close-All, pushed with conditional order
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.OrderExecutionPayload.IgnoreI">
+            <summary>
+            This property consumes "I" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "i" property which is actually OrderID (so it messes up real data)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.Position.MarginType">
+            <summary>
+            Margin type
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Data.Position.IsolatedWalletBalance">
+            <summary>
+            Isolated wallet (if isolated position)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Events.MarginCall.CrossWalletBalance">
+            <summary>
+            / Cross wallet balance. Only pushed with crossed position margin call.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.UserStream.Events.UserStreamEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.AllOrdersRequest.FromID">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.AllOrdersRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.ChangeInitialLeverageRequest.Leverage">
+            <summary>
+            From 1 to 125
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.IncomeHistoryRequest.IncomeType">
+            <summary>
+            If is not set, all kinds of flow will be returned
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.IncomeHistoryRequest.FromID">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.IncomeHistoryRequest.Limit">
+            <summary>
+            Default 100; max 1000.
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.CreateStopMarketRequest(System.String,BinanceMapper.Delivery.V1.Data.OrderSide,System.Decimal,System.Decimal)">
+            <summary>
+            Set Quantity always except with ClosePosition=True.
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.CreateTakeProfitMarketRequest(System.String,BinanceMapper.Delivery.V1.Data.OrderSide,System.Decimal,System.Decimal)">
+            <summary>
+            Set Quantity always except with ClosePosition=True.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.Quantity">
+            <summary>
+            Cannot be sent with ClosePosition=True. 
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.PositionSide">
+            <summary>
+            Default BOTH for One-way Mode; LONG or SHORT for Hedge Mode. It must be sent with Hedge Mode.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.Price">
+            <summary>
+            Affect (must be sent with) LIMIT, STOP, TAKE_PROFIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.StopPrice">
+            <summary>
+            Used with STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, and TAKE_PROFIT_LIMIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.IsReduceOnly">
+            <summary>
+            Cannot be sent in Hedge Mode. 
+            Cannot be sent with ClosePosition=true.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.IsClosePosition">
+            <summary>
+            Used with STOP_MARKET or TAKE_PROFIT_MARKET.
+            Cannot be used with Quantity parameter.
+            Cannot be used with ReduceOnly parameter.
+            In Hedge Mode, cannot be used with BUY orders in LONG position side and cannot be used with SELL orders in SHORT position side.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.ClientOrderID">
+            <summary>
+            OutboundAccountInfo unique id for the order. Automatically generated if not sent.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.TimeInForce">
+            <summary>
+            Usually used with LIMIT orders. Can be sent with STOP, TAKE_PROFIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.NewOrderRequest.WorkType">
+            <summary>
+            StopPrice triggered by: "MARK_PRICE", "CONTRACT_PRICE". Default "CONTRACT_PRICE".
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.OrderCancelRequest.ClientCancelID">
+            <summary>
+            Used to uniquely identify this cancel. Automatically generated by default.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Account.TradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.AggregatedTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.AggregatedTradesRequest.FromID">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.AggregatedTradesRequest.Start">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.AggregatedTradesRequest.End">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.AggregatedTradesRequest.StartInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.AggregatedTradesRequest.EndInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.CandlesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.FundingRateHistoryRequest.Limit">
+            <summary>
+            Default 100; max 1096
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.FundingRateHistoryRequest.Start">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.FundingRateHistoryRequest.End">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.FundingRateHistoryRequest.StartInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.FundingRateHistoryRequest.EndInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.OldTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.OldTradesRequest.FromID">
+            <summary>
+            TradeId to fetch from. Default gets most recent trades
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.OrderBookRequest.Limit">
+            <summary>
+            Default 100; Valid limits:[5, 10, 20, 50, 100, 500, 1000]
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Requests.Market.RecentTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Responses.Market.AggregatedTick.IsBuyerMaker">
+            <summary>
+            Was the buyer the maker?
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.V1.Responses.Market.Tick.IsBuyerMaker">
+            <summary>
+            Was the buyer the maker?
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Delivery.WebSocket.Data.WebsocketEventType">
+            <summary>
+            Defines mapping rules for namespace BinanceMapper.Futures.WebSocket .Events and .Streams
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.WebSocket.Events.CombinedStreamEvent.EventType">
+            <summary>
+            Shortcut for Stream.EventType
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.WebSocket.Events.WebsocketEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Delivery.WebSocket.Streams.CreatorPublicStreams.idStream">
+            <summary>
+            Поле идентификатора запроса  
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Delivery.WebSocket.Streams.CreatorPublicStreams.IdentificatorStream">
+            <summary>
+            Основное свойство идентификатора запроса (Инкрементируется при каждом вызове метода без передачи id)
+            Возвращается истинное значение Id поэтому idStream = 1
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Delivery.WebSocket.Streams.CreatorPublicStreams.CreateSubscription(BinanceMapper.Delivery.WebSocket.Data.SubType,System.String,BinanceMapper.Delivery.WebSocket.Data.WebsocketEventType,System.Nullable{System.Int32})">
+            <summary>
+            Создание JSON подписки или отписки от основных маркет каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbol">Инструмент подписки</param>
+            <param name="eventType">Событие подписки</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Delivery.WebSocket.Streams.CreatorPublicStreams.CreateSubscription(BinanceMapper.Delivery.WebSocket.Data.SubType,System.String,BinanceMapper.Delivery.WebSocket.Data.WebsocketEventType,System.Nullable{BinanceMapper.Delivery.WebSocket.Data.OrderBookUpdateType},System.Nullable{System.Int32})">
+            <summary>
+            Создание JSON подписки или отписки от основных маркет каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbol">Инструмент подписки</param>
+            <param name="eventType">Событие подписки</param>
+            <param name="updateFrequency">Можно оставить null если нужно 250ms</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Delivery.WebSocket.Streams.CreatorPublicStreams.CreateSubscriptions(BinanceMapper.Delivery.WebSocket.Data.SubType,System.Collections.Generic.Dictionary{System.String,BinanceMapper.Delivery.WebSocket.Data.WebsocketEventType},System.Nullable{System.Int32})">
+            <summary>
+            Создание одновременно нескольких JSON подписок или отписок основных каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbolsEventsDictionary">Словарь всех подписок (key: symbol, value: eventType)</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Delivery.WebSocket.Streams.CreatorPublicStreams.CreateListSubs">
+            <summary>
+            Подписка на просмотр всех активных каналов WS
+            </summary>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Delivery.WebSocket.Streams.CreatorPublicStreams.CreateProperty(BinanceMapper.Delivery.WebSocket.Data.SubType,BinanceMapper.Delivery.WebSocket.Data.StreamPropertyType,System.Boolean,System.Nullable{System.Int32})">
+            <summary>
+            Создание или получение свойств каналов (Доступно только Combined. см.BinanceApi)
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="propertyType">Свойства каналов подписок</param>
+            <param name="value">Передача bool значения свойству</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns></returns>
+        </member>
+        <member name="M:BinanceMapper.Extensions.EnumHelper.ToEnum``1(System.String)">
+            <summary>
+             Расширение для всех enum проекта. Перевод из строки в enumType. Если не существует вернет DefaultEnumType
+             </summary>
+             <typeparam name="T"></typeparam>
+             <param name="str"></param>
+             <returns></returns>
+        </member>
+        <member name="M:BinanceMapper.Extensions.EnumHelper.ToListEnum``1(System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+             Расширение для всех enum проекта. Перевод из строки в enumType. Если не существует вернет DefaultEnumType
+             </summary>
+             <typeparam name="T"></typeparam>
+             <returns></returns>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Data.Enums.EventFuturesPublicType">
+            <summary>
+            Название подписки
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Data.Enums.MarketFuturesSubType">
+            <summary>
+            Тип подписки
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Data.Enums.PublicFuturesEndpointType">
+            <summary>
+            Типы публичной подписки 
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Events.DefaultPublicFuturesEvent">
+            <summary>
+            Дефолтный ивент
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Events.OrderBookEvent">
+            <summary>
+            Респонс ордербук
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.MarketWS.Events.OrderBookEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Events.SymbolTickerEvent">
+            <summary>
+            Респонс Individual Symbol Ticker
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Events.TradeEvent">
+            <summary>
+            Респонс трейдов
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.IMarketStreamsFuturesHandlerFactory">
+            <summary>
+            Интерфейс фабрики публичных запросов
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.MarketStreamsFuturesHandlerFactory">
+            <summary>
+            Фабрика публичных запросов Спот
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.MarketWS.Subscriptions.FuturesMarketCombineStreamsSubs">
+            <summary>
+            Статичный класс для подписки на все типы каналов (Быстрый сбор без хранения информации)
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Futures.MarketWS.Subscriptions.FuturesMarketCombineStreamsSubs.idStream">
+            <summary>
+            Поле идентификатора запроса  
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.MarketWS.Subscriptions.FuturesMarketCombineStreamsSubs.IdentificatorStream">
+            <summary>
+            Основное свойство идентификатора запроса (Инкрементируется при каждом вызове метода без передачи id)
+            Возвращается истинное значение Id поэтому idStream = 1
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Futures.MarketWS.Subscriptions.FuturesMarketCombineStreamsSubs.CreatePublicSub(System.String,BinanceMapper.Futures.MarketWS.Data.Enums.MarketFuturesSubType,BinanceMapper.Futures.MarketWS.Data.Enums.PublicFuturesEndpointType,System.Nullable{System.Int32})">
+            <summary>
+            Methode for [All]
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.Balance.Value">
+            <summary>
+            Wallet balance
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.Balance.CrossValue">
+            <summary>
+            Cross wallet balance
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.MarginCallPosition.MarginType">
+            <summary>
+            Margin type
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.MarginCallPosition.IsolatedWalletBalance">
+            <summary>
+            Isolated wallet (if isolated position)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.OrderExecutionPayload.CommissionAmount">
+            <summary>
+            Will not push if no commission
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.OrderExecutionPayload.CommissionAsset">
+            <summary>
+            Will not push if no commission
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.OrderExecutionPayload.IsClosePosition">
+            <summary>
+            If Close-All, pushed with conditional order
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.OrderExecutionPayload.IgnoreI">
+            <summary>
+            This property consumes "I" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "i" property which is actually OrderID (so it messes up real data)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.Position.MarginType">
+            <summary>
+            Margin type
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Data.Position.IsolatedWalletBalance">
+            <summary>
+            Isolated wallet (if isolated position)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Events.MarginCall.CrossWalletBalance">
+            <summary>
+            / Cross wallet balance. Only pushed with crossed position margin call.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.UserStream.Events.UserStreamEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Futures.UserStream.Streams.CreatorPrivateStreams.CreateSubscription(System.String,System.String)">
+            <summary>
+            Не содание подписки а создания URL для старта WS
+            </summary>
+            <param name="listenKey"></param>
+            <param name="baseUrl"></param>
+            <returns></returns>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.AllOrdersRequest.FromID">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.AllOrdersRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.ChangeInitialLeverageRequest.Leverage">
+            <summary>
+            From 1 to 125
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.IncomeHistoryRequest.IncomeType">
+            <summary>
+            If is not set, all kinds of flow will be returned
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.IncomeHistoryRequest.FromID">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.IncomeHistoryRequest.Limit">
+            <summary>
+            Default 100; max 1000.
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.CreateStopMarketRequest(System.String,BinanceMapper.Futures.V1.Data.OrderSide,System.Decimal,System.Decimal)">
+            <summary>
+            Set Quantity always except with ClosePosition=True.
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.CreateTakeProfitMarketRequest(System.String,BinanceMapper.Futures.V1.Data.OrderSide,System.Decimal,System.Decimal)">
+            <summary>
+            Set Quantity always except with ClosePosition=True.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.Quantity">
+            <summary>
+            Cannot be sent with ClosePosition=True. 
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.PositionSide">
+            <summary>
+            Default BOTH for One-way Mode; LONG or SHORT for Hedge Mode. It must be sent with Hedge Mode.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.Price">
+            <summary>
+            Affect (must be sent with) LIMIT, STOP, TAKE_PROFIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.StopPrice">
+            <summary>
+            Used with STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, and TAKE_PROFIT_LIMIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.IsReduceOnly">
+            <summary>
+            Cannot be sent in Hedge Mode. 
+            Cannot be sent with ClosePosition=true.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.IsClosePosition">
+            <summary>
+            Used with STOP_MARKET or TAKE_PROFIT_MARKET.
+            Cannot be used with Quantity parameter.
+            Cannot be used with ReduceOnly parameter.
+            In Hedge Mode, cannot be used with BUY orders in LONG position side and cannot be used with SELL orders in SHORT position side.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.ClientOrderID">
+            <summary>
+            OutboundAccountInfo unique id for the order. Automatically generated if not sent.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.TimeInForce">
+            <summary>
+            Usually used with LIMIT orders. Can be sent with STOP, TAKE_PROFIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.NewOrderRequest.WorkType">
+            <summary>
+            StopPrice triggered by: "MARK_PRICE", "CONTRACT_PRICE". Default "CONTRACT_PRICE".
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.OrderCancelRequest.ClientCancelID">
+            <summary>
+            Used to uniquely identify this cancel. Automatically generated by default.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Account.TradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.AggregatedTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.AggregatedTradesRequest.FromID">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.AggregatedTradesRequest.Start">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.AggregatedTradesRequest.End">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.AggregatedTradesRequest.StartInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.AggregatedTradesRequest.EndInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.CandlesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.FundingRateHistoryRequest.Limit">
+            <summary>
+            Default 100; max 1096
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.FundingRateHistoryRequest.Start">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.FundingRateHistoryRequest.End">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.FundingRateHistoryRequest.StartInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.FundingRateHistoryRequest.EndInMilliseconds">
+            <summary>
+            INCLUSIVE
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.OldTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.OldTradesRequest.FromID">
+            <summary>
+            TradeId to fetch from. Default gets most recent trades
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.OrderBookRequest.Limit">
+            <summary>
+            Default 100; Valid limits:[5, 10, 20, 50, 100, 500, 1000]
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Requests.Market.RecentTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Responses.Market.AggregatedTick.IsBuyerMaker">
+            <summary>
+            Was the buyer the maker?
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.V1.Responses.Market.Tick.IsBuyerMaker">
+            <summary>
+            Was the buyer the maker?
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Futures.WebSocket.Data.OrderBookUpdateType.Ms1000">
+            <summary>
+            Доступно только для Spot
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Futures.WebSocket.Data.WebsocketEventType">
+            <summary>
+            Defines mapping rules for namespace BinanceMapper.Futures.WebSocket .Events and .Streams
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.WebSocket.Events.CombinedStreamEvent.EventType">
+            <summary>
+            Shortcut for Stream.EventType
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.WebSocket.Events.WebsocketEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Futures.WebSocket.Streams.CreatorPublicStreams.idStream">
+            <summary>
+            Поле идентификатора запроса  
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Futures.WebSocket.Streams.CreatorPublicStreams.IdentificatorStream">
+            <summary>
+            Основное свойство идентификатора запроса (Инкрементируется при каждом вызове метода без передачи id)
+            Возвращается истинное значение Id поэтому idStream = 1
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Futures.WebSocket.Streams.CreatorPublicStreams.CreateSubscription(BinanceMapper.Futures.WebSocket.Data.SubType,System.String,BinanceMapper.Futures.WebSocket.Data.WebsocketEventType,System.Nullable{System.Int32})">
+            <summary>
+            Создание JSON подписки или отписки от основных маркет каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbol">Инструмент подписки</param>
+            <param name="eventType">Событие подписки</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Futures.WebSocket.Streams.CreatorPublicStreams.CreateSubscription(BinanceMapper.Futures.WebSocket.Data.SubType,System.String,BinanceMapper.Futures.WebSocket.Data.WebsocketEventType,System.Nullable{BinanceMapper.Futures.WebSocket.Data.OrderBookUpdateType},System.Nullable{System.Int32})">
+            <summary>
+            Создание JSON подписки или отписки от основных маркет каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbol">Инструмент подписки</param>
+            <param name="eventType">Событие подписки</param>
+            <param name="updateFrequency">Можно оставить null если нужно 250ms</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Futures.WebSocket.Streams.CreatorPublicStreams.CreateSubscriptions(BinanceMapper.Futures.WebSocket.Data.SubType,System.Collections.Generic.Dictionary{System.String,BinanceMapper.Futures.WebSocket.Data.WebsocketEventType},System.Nullable{System.Int32})">
+            <summary>
+            Создание одновременно нескольких JSON подписок или отписок основных каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbolsEventsDictionary">Словарь всех подписок (key: symbol, value: eventType)</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Futures.WebSocket.Streams.CreatorPublicStreams.CreateListSubs">
+            <summary>
+            Подписка на просмотр всех активных каналов WS
+            </summary>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Futures.WebSocket.Streams.CreatorPublicStreams.CreateProperty(BinanceMapper.Futures.WebSocket.Data.SubType,BinanceMapper.Futures.WebSocket.Data.StreamPropertyType,System.Boolean,System.Nullable{System.Int32})">
+            <summary>
+            Создание или получение свойств каналов (Доступно только Combined. см.BinanceApi)
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="propertyType">Свойства каналов подписок</param>
+            <param name="value">Передача bool значения свойству</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns></returns>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.AllOrdersRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.ForceLiquidationRecordRequest.Page">
+            <summary>
+            Starts from 1; Default: 1
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.ForceLiquidationRecordRequest.SizeOfPage">
+            <summary>
+            Default: 10; Max: 100
+            </summary>
+            
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.InterestHistoryRequest.Page">
+            <summary>
+            Starts from 1; Default: 1
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.InterestHistoryRequest.SizeOfPage">
+            <summary>
+            Default: 10; Max: 100
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.LoanHistoryRequest.Page">
+            <summary>
+            Starts from 1; Default: 1
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.LoanHistoryRequest.SizeOfPage">
+            <summary>
+            Default: 10; Max: 100
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.NewOrderRequest.StopPrice">
+            <summary>
+            Used with STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, and TAKE_PROFIT_LIMIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.NewOrderRequest.IcebergQuantity">
+            <summary>
+            Used with LIMIT, STOP_LOSS_LIMIT, and TAKE_PROFIT_LIMIT to create an iceberg order.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.NewOrderRequest.ClientOrderID">
+            <summary>
+            OutboundAccountInfo unique id for the order. Automatically generated if not sent.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.NewOrderRequest.OrderResponseType">
+            <summary>
+            Set the response JSON. MARKET and LIMIT order types default to FULL, all other orders default to ACK.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.OrderCancelRequest.ClientCancelID">
+            <summary>
+            Used to uniquely identify this cancel. Automatically generated by default.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.RepayHistoryRequest.Page">
+            <summary>
+            Starts from 1; Default: 1
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.RepayHistoryRequest.SizeOfPage">
+            <summary>
+            Default: 10; Max: 100
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.TradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.TransferFuturesHistoryRequest.Page">
+            <summary>
+            Starts from 1; Default: 1
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.TransferFuturesHistoryRequest.SizeOfPage">
+            <summary>
+            Default: 10; Max: 100
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.TransferMarginHistoryRequest.Page">
+            <summary>
+            Starts from 1; Default: 1
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Requests.TransferMarginHistoryRequest.SizeOfPage">
+            <summary>
+            Default: 10; Max: 100
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Margin.V1.Responses.Interest.Type">
+            <summary>
+            The only mentioned value is "ON_BORROW"
+            <para>I have no slightest idea about other possible values. I'll happily provide enum as soon as values will be known</para>
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Data.Enums.EventSpotPublicType">
+            <summary>
+            Название подписки
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Data.Enums.MarketSpotSubType">
+            <summary>
+            Тип подписки
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Data.Enums.PublicSpotEndpointType">
+            <summary>
+            Типы публичной подписки Спот 
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Events.DefaultPublicSpotEvent">
+            <summary>
+            Дефолтный ивент
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Events.OrderBookEvent">
+            <summary>
+            Респонс ордербук
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.MarketWS.Events.OrderBookEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Events.SymbolTickerEvent">
+            <summary>
+            Респонс Individual Symbol Ticker
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Events.TradeEvent">
+            <summary>
+            Респонс трейдов
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.IMarketStreamsSpotHandlerFactory">
+            <summary>
+            Интерфейс фабрики публичных запросов
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.MarketStreamsSpotHandlerFactory">
+            <summary>
+            Фабрика публичных запросов Спот
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.MarketWS.Subscriptions.SpotMarketCombineStreamsSubs">
+            <summary>
+            Статичный класс для подписки на все типы каналов (Быстрый сбор без хранения информации)
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.MarketWS.Subscriptions.SpotMarketCombineStreamsSubs.idStream">
+            <summary>
+            Поле идентификатора запроса  
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.MarketWS.Subscriptions.SpotMarketCombineStreamsSubs.IdentificatorStream">
+            <summary>
+            Основное свойство идентификатора запроса (Инкрементируется при каждом вызове метода без передачи id)
+            Возвращается истинное значение Id поэтому idStream = 1
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Spot.MarketWS.Subscriptions.SpotMarketCombineStreamsSubs.CreatePublicSub(System.String,BinanceMapper.Spot.MarketWS.Data.Enums.MarketSpotSubType,BinanceMapper.Spot.MarketWS.Data.Enums.PublicSpotEndpointType,System.Nullable{System.Int32})">
+            <summary>
+            Methode for [All]
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.UserStream.Data.UserStreamEventType">
+            <summary>
+            Defines mapping rules for namespace BinanceMapper.V1.UserStream.Events
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.UserStream.Data.UserStreamEventType.OutboundAccountInfo">
+            <summary>
+            Associated type is OutboundAccountInfo
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.UserStream.Data.UserStreamEventType.OutboundAccountPosition">
+            <summary>
+            Associated type is OutboundAccountPosition
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.UserStream.Data.UserStreamEventType.ExecutionReport">
+            <summary>
+            Associated type is OrderExecutionReport
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.UserStream.Events.OrderExecutionReport.OriginalOrderID">
+            <summary>
+            This is the ID of the order being canceled
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.UserStream.Events.OrderExecutionReport.LastQuoteAssetTransactedQuantity">
+            <summary>
+            // Last quote asset transacted quantity (i.e. lastPrice * lastQty)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.UserStream.Events.UserStreamEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.Websocket.Data.OrderBookUpdateType.Ms1000">
+            <summary>
+            Доступно только для Spot
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.Websocket.Data.WebsocketEventType">
+            <summary>
+            Defines mapping rules for namespace BinanceMapper.V1.Websocket .Events and .Streams
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.Websocket.Data.WebsocketEventType.Tick">
+            <summary>
+            <para>Associated data type is Tick</para>
+            <para>Associated stream type is TickStreamData</para>
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.Websocket.Data.WebsocketEventType.PartialOrderBookUpdate">
+            <summary>
+            <para>Associated data type is PartialOrderBookUpdate</para>
+            <para>Associated stream type is PartialOrderBookStreamData</para>
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Websocket.Events.Tick.IgnoreM">
+            <summary>
+            This property consumes "M" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "m" property which is actually IsBuyerMaker (so it messes up real data)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Websocket.Events.WebsocketEvent.Ignore">
+            <summary>
+            This property consumes "e" value because otherwise
+            newtonsoft.json tries to resolve it in case-insensitive way
+            as "E" property which is of type Int64 (so it ends up with exception)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Websocket.Events.CombinedStreamEvent.EventType">
+            <summary>
+            Shortcut for Stream.EventType
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.Exchange.V3.Data.ExchangeFilterType.MaxNumberOfAllOrders">
+            <summary>
+            Including "Algo" orders
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.Exchange.V3.Data.ExchangeFilterType.MaxNumberOfAlgoOrders">
+            <summary>
+            "Algo" orders are STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, and TAKE_PROFIT_LIMIT
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.Exchange.V3.Data.SymbolFilterType.MaxNumberOfAlgoOrders">
+            <summary>
+            "Algo" orders are STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, and TAKE_PROFIT_LIMIT
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Data.IcebergPartsSymbolFilter.Limit">
+            <summary>
+            Defines the maximum parts an iceberg order can have. The number is defined as CEIL(qty / icebergQty)
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Data.MinNotionalSymbolFilter.Value">
+            <summary>
+            An order's notional value is the price * quantity
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Data.MinNotionalSymbolFilter.NumberOfMinutesAveragePriceIsCalculatedOver">
+            <summary>
+            0 means the last price is used
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Data.PercentPriceSymbolFilter.NumberOfMinutesAveragePriceIsCalculatedOver">
+            <summary>
+            0 means the last price is used
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Responses.AggregatedTick.IsBuyerMaker">
+            <summary>
+            Was the buyer the maker?
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Responses.AggregatedTick.IsBestMatch">
+            <summary>
+            Was the trade the best price match?
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Responses.Tick.IsBuyerMaker">
+            <summary>
+            Was the buyer the maker?
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Responses.Tick.IsBestMatch">
+            <summary>
+            Was the trade the best price match?
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.AggregatedTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.CandlesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.OldTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.OrderBookRequest.Limit">
+            <summary>
+            Default 100; Valid limits:[5, 10, 20, 50, 100, 500, 1000, 5000]
+            <para>Caution: setting 0 can return a lot of data.</para>
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.RecentTradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.AllOrdersRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="T:BinanceMapper.Spot.Exchange.V3.Requests.NewOrderRequest">
+            <summary>
+            Other info:
+            <para>LIMIT_MAKER are LIMIT orders that will be rejected if they would immediately match and trade as a taker.</para>
+            <para>STOP_LOSS and TAKE_PROFIT will execute a MARKET order when the stopPrice is reached.</para>
+            <para>Any LIMIT or LIMIT_MAKER type order can be made an iceberg order by sending an icebergQty.</para>
+            <para>Any order with an icebergQty MUST have timeInForce set to GTC.</para>
+            <para>Trigger order price rules against market price for both MARKET and LIMIT versions:</para>
+            <para>Price above market price: STOP_LOSS BUY, TAKE_PROFIT SELL</para>
+            <para>Price below market price: STOP_LOSS SELL, TAKE_PROFIT BUY</para>
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.NewOrderRequest.StopPrice">
+            <summary>
+            Used with STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, and TAKE_PROFIT_LIMIT orders.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.NewOrderRequest.IcebergQuantity">
+            <summary>
+            Used with LIMIT, STOP_LOSS_LIMIT, and TAKE_PROFIT_LIMIT to create an iceberg order.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.NewOrderRequest.ClientOrderID">
+            <summary>
+            OutboundAccountInfo unique id for the order. Automatically generated if not sent.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.NewOrderRequest.OrderResponseType">
+            <summary>
+            Set the response JSON. MARKET and LIMIT order types default to FULL, all other orders default to ACK.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.OrderCancelRequest.ClientCancelID">
+            <summary>
+            Used to uniquely identify this cancel. Automatically generated by default.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Exchange.V3.Requests.TradesRequest.Limit">
+            <summary>
+            Default 500; max 1000.
+            </summary>
+        </member>
+        <member name="F:BinanceMapper.Spot.WebSocket.Streams.CreatorPublicStreams.idStream">
+            <summary>
+            Поле идентификатора запроса  
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.WebSocket.Streams.CreatorPublicStreams.IdentificatorStream">
+            <summary>
+            Основное свойство идентификатора запроса (Инкрементируется при каждом вызове метода без передачи id)
+            Возвращается истинное значение Id поэтому idStream = 1
+            </summary>
+        </member>
+        <member name="M:BinanceMapper.Spot.WebSocket.Streams.CreatorPublicStreams.CreateSubscription(BinanceMapper.Spot.Websocket.Data.SubType,System.String,BinanceMapper.Spot.Websocket.Data.WebsocketEventType,System.Nullable{System.Int32})">
+            <summary>
+            Создание JSON подписки или отписки от основных маркет каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbol">Инструмент подписки</param>
+            <param name="eventType">Событие подписки</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Spot.WebSocket.Streams.CreatorPublicStreams.CreateSubscription(BinanceMapper.Spot.Websocket.Data.SubType,System.String,BinanceMapper.Spot.Websocket.Data.WebsocketEventType,System.Nullable{BinanceMapper.Spot.Websocket.Data.OrderBookUpdateType},System.Nullable{System.Int32})">
+            <summary>
+            Создание JSON подписки или отписки от основных маркет каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbol">Инструмент подписки</param>
+            <param name="eventType">Событие подписки</param>
+            <param name="updateFrequency">Можно оставить Null если нужно 1000ms</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Spot.WebSocket.Streams.CreatorPublicStreams.CreateSubscriptions(BinanceMapper.Spot.Websocket.Data.SubType,System.Collections.Generic.Dictionary{System.String,BinanceMapper.Spot.Websocket.Data.WebsocketEventType},System.Nullable{System.Int32})">
+            <summary>
+            Создание одновременно нескольких JSON подписок или отписок основных каналов Binance
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="symbolsEventsDictionary">Словарь всех подписок (key: symbol, value: eventType)</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Spot.WebSocket.Streams.CreatorPublicStreams.CreateListSubs">
+            <summary>
+            Подписка на просмотр всех активных каналов WS
+            </summary>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:BinanceMapper.Spot.WebSocket.Streams.CreatorPublicStreams.CreateProperty(BinanceMapper.Spot.Websocket.Data.SubType,BinanceMapper.Spot.Websocket.Data.StreamPropertyType,System.Boolean,System.Nullable{System.Int32})">
+            <summary>
+            Создание или получение свойств каналов (Доступно только Combined. см.BinanceApi)
+            </summary>
+            <param name="subType">Отписаться или подписаться</param>
+            <param name="propertyType">Свойства каналов подписок</param>
+            <param name="value">Передача bool значения свойству</param>
+            <param name="id">Идентификатор подписки если не задан, инкрементирует свойство класса</param>
+            <returns></returns>
+        </member>
+        <member name="T:BinanceMapper.Spot.Withdrawal.V3.Requests.DustLogRequest">
+            <summary>
+            Fetch small amounts of assets exchanged BNB records
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Withdrawal.V3.Requests.WithdrawRequest.AddressTag">
+            <summary>
+            Secondary address identifier for coins like XRP,XMR etc.
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Withdrawal.V3.Requests.WithdrawRequest.Name">
+            <summary>
+            Description of the address
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Spot.Withdrawal.V3.Responses.DustLogResult.Rows">
+            <summary>
+            Same as Results.Rows just for easier access
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Requests.IRequestContent.Headers">
+            <summary>
+            Authorized requests only; null otherwise
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Requests.RequestArranger.TimestampShiftInMilliseconds">
+            <summary>
+            Shift from a timestamp (UTC) of the request. Serves for synchronizing with binance server time
+            </summary>
+        </member>
+        <member name="P:BinanceMapper.Requests.RequestArranger.ActualityWindow">
+            <summary>
+            Parameter mentioned in binance docs as recvWindow
+            <para>Exchange will decline requests that older than timestamp + recvWindow</para>
+            <para>Default value is 5000</para>
+            </summary>
+        </member>
+    </members>
+</doc>
