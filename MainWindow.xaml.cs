@@ -131,6 +131,13 @@ namespace RBTB_WindowsClient_Frame
             if (IsTrading)
             {
                 Log("Торговля разрешена, открываю ордера..");
+                if (_binanceRestClient.RequestAccountInfo(out var balances))
+                {
+                    var balance = balances.Balances.Where(x => x.Asset == "USDT").FirstOrDefault();
+                    var balanceBTC = balances.Balances.Where(x => x.Asset == "BTC").FirstOrDefault();
+                    Log("Баланс USDT: " + balance.Free.ToString());
+                    Log("Баланс BTC: " + balanceBTC.Free.ToString());
+                }
                 
                 var order = new NewOrderRequest(symbol, OrderSide.Buy, OrderType.Market, Volume);
                 if (_binanceRestClient.RequestNewOrder(out var data, out var error, "", order))
