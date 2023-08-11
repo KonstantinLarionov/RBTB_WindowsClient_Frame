@@ -27,6 +27,10 @@ using RBTB_WindowsClient_Frame.Controls;
 using RBTB_WindowsClient_Frame.Integrations.MyNamespace;
 using OrderType = BinanceMapper.Spot.Exchange.V3.Data.OrderType;
 using TimeInForce = BinanceMapper.Spot.Exchange.V3.Data.TimeInForce;
+using RBTB_WindowsClient_Frame.Database;
+using RBTB_WindowsClient_Frame.Domains.Entities;
+using System.Security.Policy;
+using System.Windows.Threading;
 
 namespace RBTB_WindowsClient_Frame
 {
@@ -41,8 +45,12 @@ namespace RBTB_WindowsClient_Frame
 		private TradesClient tradesRepo;
 		private AccountClient _accountClient;
 
-		private Guid userId = new Guid( "cf955f5a-c14c-4040-b439-38cf5736119f" );
-        private decimal Volume;
+		private MainContext _mainContext;
+		public static Dictionary<NameType, Option> _urls = new Dictionary<NameType, Option>();
+
+		//private Guid userId = new Guid( "cf955f5a-c14c-4040-b439-38cf5736119f" ); //КО
+		private Guid userId = new Guid( "16348742-ccc1-4c02-9abb-8c973763b982" ); //CА
+		private decimal Volume;
         private bool IsTrading = true;
         private decimal TicksOut;
         private List<decimal> UseLevels = new List<decimal>();
@@ -52,19 +60,49 @@ namespace RBTB_WindowsClient_Frame
 		private WalletControl walletControl;
 		private OptionsControl optionsControl;
 
+
 		public MainWindow()
         {
-            InitializeComponent();
 
-			walletControl = new WalletControl( userId );
-			optionsControl = new OptionsControl();
+			InitializeComponent();
+#if Outside
+			_urls = new Dictionary<NameType, Option>()
+			{
+				{ NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://188.186.238.120:5246"  } },
+				{ NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://188.186.238.120:5249" } },
+				{ NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } }
+			};
+#elif Debug
+			_urls = new Dictionary<NameType, Option>()
+			{
+				{ NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://188.186.238.120:5246"  } },
+				{ NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://188.186.238.120:5249" } },
+				{ NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } }
+			};
+#else
+			_urls = new Dictionary<NameType, Option>()
+			{
+				{ NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://192.168.90.213:5246"  } },
+				{ NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://192.168.90.213:5249" } },
+				{ NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } }
+			};
+#endif
 
+			_mainContext = new MainContext();
+			_mainContext.Database.CreateIfNotExists();
+
+			_accountClient = new AccountClient( _urls[NameType.URL_ServiceAccount].ValueString, new System.Net.Http.HttpClient());
+
+			walletControl = new WalletControl( userId, _accountClient );
+			
+			optionsControl = new OptionsControl( _mainContext );
 			main_space.Children.Add( optionsControl );
-			_accountClient = new AccountClient( "http://188.186.238.120:5249", new System.Net.Http.HttpClient());
-			_telegramRestClient = new TelegramClient( chat: optionsControl.tb_tg.Text );
+			options.Foreground = new SolidColorBrush( Colors.Gray );
+
+			_telegramRestClient = new TelegramClient();
+			
 			Log( "Включение робота загрузка настроек.." );
 			optionsControl.logger.Document.LineHeight = 2;
-            LoadingOptions();
 
 			Log( "Настройки успешно загружены." );
 			Log( "Робот готов к работе." );
@@ -72,30 +110,29 @@ namespace RBTB_WindowsClient_Frame
 
 		private void MainTaskTrading()
 		{
-			Dispatcher.BeginInvoke( delegate ()
-			{
-				Thread.Sleep( 1000 );
-				var ra = new RequestArranger( optionsControl.tb_api.Password, optionsControl.tb_secret.Password );
-				ra.ActualityWindow = 10000;
-				_binanceRestClient = new BinanceRestClient( ra );
-				_binanceRestClient.SetUrl( "https://api.binance.com" );
-				_wsStrategyService = new WsClientStrategyService();
+			Thread.Sleep( 1000 );
 
-				Volume = Convert.ToDecimal( optionsControl.tb_btc.Text );
-				//IsTrading = tgl_trade.IsChecked.Value;
-				TicksOut = Convert.ToDecimal( optionsControl.tb_pips.Text );
+			var ra = new RequestArranger( optionsControl.Model.ApiKey, optionsControl.Model.SecretKey );
+			ra.ActualityWindow = 10000;
 
-				SaveBalanceUSDT();
+			_binanceRestClient = new BinanceRestClient( ra );
+			_binanceRestClient.SetUrl( _urls[NameType.URL_Binance].ValueString );
 
-				Log( $"Клиент успешно запущен\r\nВсе настройки применены\r\nОбъем входа: {Volume}\r\nТорговля: {IsTrading}\r\nПунктов на выход: {TicksOut}" );
-				Log( $"Подключение к серверу стратегий.." );
+			_wsStrategyService = new WsClientStrategyService();
 
-				_wsStrategyService.StrategyTradeEv += WsStrategyServiceOnStrategyTradeEv;
-				_wsStrategyService.ErrorEv += WsStrategyServiceOnErrorEv;
-				_wsStrategyService.OpenEv += WsStrategyServiceOnOpenEv;
-				_wsStrategyService.SetUrlServiceStrategy( optionsControl.tb_ss.Text );
-				_wsStrategyService.Start();
-			} );
+			Volume = Convert.ToDecimal( optionsControl.Model.VolumeIn );
+			TicksOut = Convert.ToDecimal( optionsControl.Model.PipsOut );
+
+			SaveBalanceUSDT();
+
+			Log( $"Клиент успешно запущен\r\nВсе настройки применены\r\nОбъем входа: {Volume}\r\nТорговля: {IsTrading}\r\nПунктов на выход: {TicksOut}" );
+			Log( $"Подключение к серверу стратегий.." );
+
+			_wsStrategyService.StrategyTradeEv += WsStrategyServiceOnStrategyTradeEv;
+			_wsStrategyService.ErrorEv += WsStrategyServiceOnErrorEv;
+			_wsStrategyService.OpenEv += WsStrategyServiceOnOpenEv;
+			_wsStrategyService.SetUrlServiceStrategy( _urls[NameType.URL_ServiceStrategy].ValueString );
+			_wsStrategyService.Start();
 		}
 
 		private void SaveBalanceUSDT()
@@ -126,7 +163,7 @@ namespace RBTB_WindowsClient_Frame
 			}
 		}
 
-		private void MainWindow_OnClosing(object sender, CancelEventArgs e) => SavingOptions();
+		private async void MainWindow_OnClosing(object sender, CancelEventArgs e) => await optionsControl.SavingOptions( optionsControl );
         private void WsStrategyServiceOnOpenEv(EventArgs e) => Log($"Успешно подключение.\r\nОжидаем ситуаций для торговли");
         private void WsStrategyServiceOnErrorEv(ErrorEventArgs e)
         {
@@ -201,67 +238,21 @@ namespace RBTB_WindowsClient_Frame
 			}
 		}
 
-		private void Log(string text)
+		private async void Log(string text)
         {
-            _telegramRestClient.SendMessage(text);
-            Dispatcher.BeginInvoke((Action) delegate
-            {
-				var par = new Paragraph( new Run( $"[{DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()}] " + text, optionsControl.logger.Selection.Start ) );
-				optionsControl.logger.Document.Blocks.InsertBefore( optionsControl.logger.Document.Blocks.FirstBlock, par);
-            });
-        }
-        private void LoadingOptions()
-        {
-            
-            using (StreamReader fs = new StreamReader(@"options.txt"))
-            {
-                int count = 0;
-                while (true)
-                {
-                    string temp = fs.ReadLine();
-                    if (temp == null) break;
-                    switch (count)
-                    {
-                        case 0:
-							optionsControl.tb_api.Password = temp;
-                            break;
-                        case 1:
-							optionsControl.tb_secret.Password = temp;
-                            break;
-                        case 2:
-							optionsControl.tb_tg.Text = temp;
-                            break;
-                        case 3:
-							optionsControl.tb_btc.Text = temp;
-                            break;
-                        case 4:
-							optionsControl.tb_pips.Text = temp;
-                            break;
-                        case 5:
-							optionsControl.tb_ss.Text = temp;
-							break;
-                        default:
-                            break;
-                    }
+			optionsControl.Model.Log = optionsControl.Model.Log.Insert( 0, $"[{DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()}] " + text + Environment.NewLine );
 
-                    count++;
-                }
-            }
-        }
-
-        private void SavingOptions()
-        {
-            using (StreamWriter writer = new StreamWriter("options.txt", false))
-            {
-                writer.WriteLine( optionsControl.tb_api.Password );
-                writer.WriteLine( optionsControl.tb_secret.Password );
-                writer.WriteLine( optionsControl.tb_tg.Text);
-                writer.WriteLine( optionsControl.tb_btc.Text);
-                writer.WriteLine( optionsControl.tb_pips.Text);
-                writer.WriteLine( optionsControl.tb_ss.Text);
-            }
-        }
-
+			var res = await _telegramRestClient.SendMessage(text, optionsControl.Model.TelegramId );
+			if ( res != null )
+			{
+				if ( res.StatusCode == System.Net.HttpStatusCode.BadRequest || res.StatusCode == System.Net.HttpStatusCode.InternalServerError )
+				{
+					var tgtext = await res.Content.ReadAsStringAsync();
+					optionsControl.Model.Log = optionsControl.Model.Log.Insert( 0, $"[{DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()}] Ошибка подключения Телеграм!\r\n{tgtext}" ); 
+				}
+			}
+		}
+		
         private string GetPrivateRsa(string path)
         {
             string temp = string.Empty;
@@ -282,7 +273,7 @@ namespace RBTB_WindowsClient_Frame
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.ShowDialog();
 
-			optionsControl.tb_secret.Password = ofd.FileName;
+			optionsControl.SecretKey.Text = ofd.FileName;
         }
 
 		private void ToggleButton_Unchecked( object sender, RoutedEventArgs e )
@@ -294,34 +285,45 @@ namespace RBTB_WindowsClient_Frame
 		{
 		}
 
-		private async void Button_Click( object sender, RoutedEventArgs e )
+		private void Button_Click( object sender, RoutedEventArgs e )
 		{
-			await Task.Run( () => { 
-			if ( MainTask == null)
+			if ( MainTask == null )
+			{
+				power.Foreground = new SolidColorBrush( Colors.LightGreen );
+			}
+			else
+			{
+				power.Foreground = new SolidColorBrush( Colors.Red );
+			}
+
+			if ( MainTask == null )
 			{
 				MainTask = new Thread( MainTaskTrading );
 				MainTask.Start();
-				((Button)sender).Foreground = new SolidColorBrush(Colors.LightGreen);
 			}
 			else
 			{
 				MainTask.Abort();
 				MainTask = null;
-				( (Button)sender ).Foreground = new SolidColorBrush( Colors.Red);
 			}
-			} );
+
 		}
+	
 
 		private void Button_Click_1( object sender, RoutedEventArgs e )
 		{
 			main_space.Children.Clear();
 			main_space.Children.Add( walletControl );
+			charts.Foreground = new SolidColorBrush( Colors.Gray );
+			options.Foreground = new SolidColorBrush( Colors.White);
 		}
 
 		private void Button_Click_2( object sender, RoutedEventArgs e )
 		{
 			main_space.Children.Clear();
 			main_space.Children.Add( optionsControl );
+			options.Foreground = new SolidColorBrush(Colors.Gray);
+			charts.Foreground = new SolidColorBrush( Colors.White );
 		}
 	}
 }

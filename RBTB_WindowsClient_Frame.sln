@@ -1,16 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RBTB_WindowsClient_Frame", "RBTB_WindowsClient_Frame.csproj", "{457B3472-A24D-40CA-9063-8867DEF15A64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Inside|Any CPU = Inside|Any CPU
+		Outside|Any CPU = Outside|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{457B3472-A24D-40CA-9063-8867DEF15A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{457B3472-A24D-40CA-9063-8867DEF15A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{457B3472-A24D-40CA-9063-8867DEF15A64}.Inside|Any CPU.ActiveCfg = Inside|Any CPU
+		{457B3472-A24D-40CA-9063-8867DEF15A64}.Inside|Any CPU.Build.0 = Inside|Any CPU
+		{457B3472-A24D-40CA-9063-8867DEF15A64}.Outside|Any CPU.ActiveCfg = Outside|Any CPU
+		{457B3472-A24D-40CA-9063-8867DEF15A64}.Outside|Any CPU.Build.0 = Outside|Any CPU
 		{457B3472-A24D-40CA-9063-8867DEF15A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{457B3472-A24D-40CA-9063-8867DEF15A64}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BFEE8CA4-F416-4100-924E-786F4E64B392}
 	EndGlobalSection
 EndGlobal

@@ -29,15 +29,14 @@ namespace RBTB_WindowsClient_Frame.Controls
 		private readonly AccountClient _accountClient;
 		private readonly Guid userId;
 
-		public WalletControl(Guid userId)
+		public WalletControl(Guid userId, AccountClient client)
 		{
 			InitializeComponent();
 			this.userId = userId;
 
 			dateStart.SelectedDate = DateTime.Now.AddDays(-1);
 			dateEnd.SelectedDate = DateTime.Now;
-			
-			_accountClient = new AccountClient( "http://188.186.238.120:5249", new System.Net.Http.HttpClient() );
+			_accountClient = client;
 		}
 
 		private async void Button_Click( object sender, RoutedEventArgs e )

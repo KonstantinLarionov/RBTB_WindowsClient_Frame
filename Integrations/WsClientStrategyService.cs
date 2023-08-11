@@ -33,7 +33,7 @@ public class WsClientStrategyService
 
     public void Start()
     {
-         _socket = new WebSocket(_baseUrl + "/ws/subscribe?idUser=" + Guid.NewGuid());
+         _socket = new WebSocket(_baseUrl.Replace("http", "ws") + "/ws/subscribe?idUser=" + Guid.NewGuid());
         _socket.OnClose += _socket_OnClose;
         _socket.OnError += _socket_OnError;
         _socket.OnMessage += _socket_OnMessage;

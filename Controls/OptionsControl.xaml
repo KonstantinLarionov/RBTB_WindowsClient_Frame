@@ -10,27 +10,32 @@
     <DockPanel>
 		<StackPanel Margin="0,10,10,10">
 			<Label Foreground="White" FontWeight="DemiBold">API ключ</Label>
-			<PasswordBox Foreground="White" Name="tb_api" Padding="5" Width="200" DockPanel.Dock="Top"/>
+			<TextBox TextChanged="Options_TextChanged" Tag="option_string" Foreground="White" Name="ApiKey" Text="{Binding ApiKey, Mode=TwoWay}" Padding="5" Width="200" DockPanel.Dock="Top"/>
 			<Label Foreground="White" FontWeight="DemiBold">Secret ключ</Label>
-			<PasswordBox Foreground="White" Name="tb_secret" Padding="5" Width="200" DockPanel.Dock="Top"/>
+			<TextBox TextChanged="Options_TextChanged" Tag="option_string" Foreground="White" Name="SecretKey" Text="{Binding SecretKey, Mode=TwoWay}" Padding="5" Width="200" DockPanel.Dock="Top"/>
 			<!--<Button Click="ButtonBase_OnClick2">Открыть</Button>-->
 			<Label Foreground="White" FontWeight="DemiBold">Телеграм ID</Label>
-			<TextBox Foreground="White" Name="tb_tg" Padding="5" Width="200" DockPanel.Dock="Top"/>
+			<TextBox TextChanged="Options_TextChanged" Tag="option_int" Foreground="White" Name="TelegramId" Text="{Binding TelegramId, Mode=TwoWay}" Padding="5" Width="200" DockPanel.Dock="Top"/>
 			<Label Foreground="White" FontWeight="DemiBold">Объем входа в BTC</Label>
-			<TextBox Foreground="White" Name="tb_btc" Padding="5" Width="200" DockPanel.Dock="Top"/>
+			<TextBox TextChanged="Options_TextChanged"  Tag="option_double" Foreground="White" Name="VolumeIn" Text="{Binding VolumeIn, Mode=TwoWay}" Padding="5" Width="200" DockPanel.Dock="Top"/>
 
 			<Label Foreground="White" FontWeight="DemiBold">Пунктов для выхода</Label>
-			<TextBox Foreground="White" Name="tb_pips" Padding="5" Width="200" DockPanel.Dock="Top"/>
-			<Label Foreground="White" FontWeight="DemiBold">Адрес сервиса стратегий</Label>
-			<TextBox Foreground="White" Name="tb_ss" Padding="5" Width="200" DockPanel.Dock="Top"/>
+			<TextBox TextChanged="Options_TextChanged" Tag="option_double" Foreground="White" Name="PipsOut" Text="{Binding PipsOut, Mode=TwoWay}" Padding="5" Width="200" DockPanel.Dock="Top"/>
+			<Button  ToolTip="Сохранить в базу данных" Click="Button_Click" Name="saver" Margin="10" HorizontalAlignment="Right" Background="Transparent" BorderBrush="Transparent" Foreground="White">
+				<materialDesign:PackIcon Kind="DatabaseCheck"/>
+			</Button>
 
 			<!--<ToggleButton Name="tgl_trade" Padding="5" Margin="0,20">Торговать при получении сигнала</ToggleButton>-->
 		</StackPanel>
 		<materialDesign:Card Background="#33FFFFFF" UniformCornerRadius="25" Margin="10" Padding="5">
 			<DockPanel >
 				<Label DockPanel.Dock="Top" Foreground="White" FontWeight="DemiBold">История работы</Label>
-				<RichTextBox VerticalScrollBarVisibility="Visible" Foreground="White" BorderThickness="0" IsReadOnly="True" Name="logger">
-
+				<RichTextBox  VerticalScrollBarVisibility="Visible" Foreground="White" BorderThickness="0" IsReadOnly="True" Name="logger">
+					<FlowDocument PageHeight="180">
+						<Paragraph>
+							<Run Text="{Binding Log, Mode=TwoWay}"/>
+						</Paragraph>
+					</FlowDocument>
 				</RichTextBox>
 
 			</DockPanel>
