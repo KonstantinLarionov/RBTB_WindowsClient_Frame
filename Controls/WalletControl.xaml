@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="RBTB_WindowsClient_Frame.Controls.WalletControl"
+			 xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             xmlns:local="clr-namespace:RBTB_WindowsClient_Frame.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="376" d:DesignWidth="655">
+	<DockPanel>
+		<DockPanel DockPanel.Dock="Top"></DockPanel>
+		<DockPanel>
+			<DockPanel Width="300">
+				<materialDesign:Card Margin="10" DockPanel.Dock="Top">
+					<StackPanel Orientation="Horizontal">
+						<DatePicker x:Name="dateStart" Margin="10,0,10,0" Width="88"/>
+						<DatePicker Name="dateEnd" Margin="0,0,10,0" Width="88"/>
+						<ComboBox Name="currency" Margin="0,0,5,0">
+							<ComboBoxItem IsSelected="True">USDT</ComboBoxItem>
+						</ComboBox>
+						<Button Click="Button_Click" Margin="0,0,10,0" Padding="0" Background="Transparent" BorderBrush="Transparent" Foreground="Black">
+							<materialDesign:PackIcon Kind="Download"/>
+						</Button>
+					</StackPanel>
+				</materialDesign:Card>
+				<DataGrid Name="dg_wallet" Margin="10,0,10,10" AutoGenerateColumns="False">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Дата" Binding="{Binding DateTime}"/>
+						<DataGridTextColumn Header="Значение" Binding="{Binding Value}"/>
+					</DataGrid.Columns>
+				</DataGrid>
+			</DockPanel>
+			<DockPanel>
+				<lvc:CartesianChart Height="100" Name="lc_percent" DockPanel.Dock="Bottom" Series="{Binding SeriesBalance}" LegendLocation="Right" Zoom="X" >
+				</lvc:CartesianChart>
+				<lvc:CartesianChart Name="lc_wallet"  DockPanel.Dock="Top" Series="{Binding SeriesBalance}" LegendLocation="Right" Zoom="X" >
+				</lvc:CartesianChart>
+			</DockPanel>
+		</DockPanel>
+	</DockPanel>
+</UserControl>
