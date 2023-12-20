@@ -14,7 +14,7 @@ public class StrategyTradeResponse
 
 public class WsClientStrategyService
 {
-    private string _baseUrl = "ws://192.168.90.124:5246";
+    private string _baseUrl = "wss://localhost:32768";
     private WebSocket _socket;
     
     public delegate void StrategyTradeEvent(decimal price, string symbol, decimal level, DateTime dateTime);

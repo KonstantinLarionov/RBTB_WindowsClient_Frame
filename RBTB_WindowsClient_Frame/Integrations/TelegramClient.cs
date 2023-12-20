@@ -9,7 +9,7 @@ public class TelegramClient
     private string Token { get; set; }
     private HttpClient HttpClient { get; set; }
 
-    public TelegramClient(string token = "6072379432:AAFGUfuPxwu6l6rTgsozMiNwHxZGx44mdTM")
+    public TelegramClient(string token = "1993731157:AAG2GnXyAoiaTk0A9d68hcTATwGYy8YEouA")
     {
         HttpClient = new HttpClient();
         System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
