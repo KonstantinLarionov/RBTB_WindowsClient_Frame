@@ -7,29 +7,23 @@ using ServerTimeResponse = BybitMapper.UTA.RestV5.Responses.Market.ServerTimeRes
 using BybitMapper.UTA.RestV5.Responses.Market;
 using BybitMapper.UTA.RestV5.Data.ObjectDTO.Market.Kline;
 using BybitMapper.UTA.RestV5.Data.ObjectDTO.Market.Orderbook;
-//using CSCommon.Http;
 using BybitMapper.UTA.RestV5.Requests.Account;
 using BybitMapper.UTA.RestV5.Responses.Account;
 using BybitMapper.UTA.RestV5.Data.ObjectDTO.Account.WalletBalance;
-using BybitMapper.UTA.UserStreamsV5;
 using BybitMapper.UTA.RestV5.Data.ObjectDTO.Trade.OpenOrders;
 using BybitMapper.UTA.RestV5.Requests.Trade;
 using BybitMapper.UTA.RestV5.Responses.Trade;
 using BybitMapper.UTA.RestV5.Data.ObjectDTO.Trade.PlaceOrder;
 using System;
-using System.Threading.Tasks;
 using RBTB_WindowsClient.Integrations.Bybit.BybitExtensions;
 using BybitMapper.UTA.RestV5.Data.ObjectDTO.Market.Tickers.Spot;
 using BybitMapper.UTA.RestV5.Responses.Market.Spot;
-using Org.BouncyCastle.Asn1.Ocsp;
 using BybitMapper.UTA.RestV5;
-using System.Runtime.Remoting.Messaging;
 
 namespace RBTB_WindowsClient.Integrations.Bybit;
 public class BybitRestClient
 {
     private RequestArranger _arranger;
-    //private CommonHttpClient _client;
     private RestSharp.RestClient _restClient;
     private UtaHandlerCompositionV5 _RESTHandlers;
 
@@ -41,7 +35,6 @@ public class BybitRestClient
 
     public BybitRestClient(string url)
     {
-        //_client = new(url);
         _restClient = new(url);
         _arranger = new RequestArranger("api", "key");
         _RESTHandlers = new UtaHandlerCompositionV5(new UtaHandlerFactory());
@@ -49,7 +42,6 @@ public class BybitRestClient
 
     public BybitRestClient(string url, string api, string key)
     {
-        //_client = new(url);
         _restClient = new(url);
         _arranger = new RequestArranger(api, key);
         _RESTHandlers = new UtaHandlerCompositionV5(new UtaHandlerFactory());
@@ -57,24 +49,24 @@ public class BybitRestClient
 
     #region [Base]
 
-    internal delegate void LogDlg(string sender, string message);
-    internal LogDlg? Log;
+    internal delegate void LogDlg(string message);
+    internal event LogDlg Log;
     internal bool LogResponseEnabled = false;
-    internal bool LogExEnabled = false;
+    internal bool LogExEnabled = true;
 
     void OnLogResponse(string response)
     {
         if (LogResponseEnabled)
         {
-            Log?.Invoke("RestClient", string.Concat("Response: ", response));
+            Log?.Invoke( string.Concat("Response: ", response));
         }
     }
 
-    void OnLogEx(Exception ex, string? response = null)
+    void OnLogEx(Exception ex, string response = null)
     {
         if (LogExEnabled)
         {
-            Log?.Invoke("RestClient", string.Concat("Exception: ", ex.Message, "; ", ex?.InnerException, " - ", response));
+            Log?.Invoke(string.Concat("Exception: ", ex.Message, "; ", ex?.InnerException, " - ", response));
         }
     }
 
@@ -175,7 +167,7 @@ public class BybitRestClient
     {
         var request = new GetWalletBalanceRequest(AccountType.Unified);
         var message = BybitHelpers.SendRestRequest<GetWalletBalanceResponse>(_arranger.Arrange(request), _restClient);
-
+        
         var response = _RESTHandlers.HandleGetWalletBalanceResponse(message);
         if (response == null)
         {

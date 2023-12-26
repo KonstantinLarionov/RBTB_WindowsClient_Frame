@@ -206,8 +206,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Integrations\Binance\BinanceRestClient.cs" />
-    <Compile Include="Integrations\Binance\BinanceWebSocket.cs" />
     <Compile Include="Integrations\TelegramClient.cs" />
     <Compile Include="Integrations\WsClientStrategyService.cs" />
     <Compile Include="MainWindow.xaml.cs">

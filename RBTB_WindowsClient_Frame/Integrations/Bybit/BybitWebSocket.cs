@@ -21,21 +21,21 @@ public class BybitWebSocket
     public string Symbol { get; set; } = "BTCUSDT";
     public PublicEndpointType EndpointType { get; set; } = PublicEndpointType.Trade;
     public delegate void DepthHandler(OrderbookEvent bookEvent);
-    public event DepthHandler? DepthEvent;
+    public event DepthHandler DepthEvent;
     public delegate void TickHandler(TickerEvent tickEvent);
-    public event TickHandler? TickEvent;
+    public event TickHandler TickEvent;
     public delegate void TradesHandler(TradeEvent tradesEvent);
-    public event TradesHandler? TradeEvent;
+    public event TradesHandler TradeEvent;
     public delegate void ExecHandler(BaseEvent exec);
-    public event ExecHandler? ExecEvent;
+    public event ExecHandler ExecEvent;
     public delegate void UserHandler(BybitMapper.UTA.UserStreamsV5.Events.BaseEvent exec);
-    public event UserHandler? UserEvent;
+    public event UserHandler UserEvent;
     public delegate void KlineHanler(KlineEvent exec);
-    public event KlineHanler? KlineEvent;
+    public event KlineHanler KlineEvent;
     public delegate void ErrorHandler(object sender, Exception ex);
-    public event ErrorHandler? ErrorEvent;
+    public event ErrorHandler ErrorEvent;
     public delegate void CloseHandler(object sender, CloseEventArgs e);
-    public event CloseHandler? CloseEvent;
+    public event CloseHandler CloseEvent;
 
     private static JsonSerializerOptions jsonSerializerOptions = new()
     {
@@ -49,7 +49,7 @@ public class BybitWebSocket
         UserStreams = new UserStreamsHandlerCompositionV5(new UserStreamsHandlerFactoryV5());
     }
 
-    private static T? Deserialize<T>(byte[] message)
+    private static T Deserialize<T>(byte[] message)
     {
         using (MemoryStream stream = new MemoryStream(message, 0, message.Length))
         {
@@ -59,8 +59,8 @@ public class BybitWebSocket
 
     private void SocketOnMessage(object sender, MessageEventArgs e)
     {
-        DefaultSpotEvent? baseEvent = null;
-        BybitMapper.UTA.UserStreamsV5.Events.BaseEvent? defaultEvent = null;
+        DefaultSpotEvent baseEvent = null;
+        BybitMapper.UTA.UserStreamsV5.Events.BaseEvent defaultEvent = null;
 
         try
         {

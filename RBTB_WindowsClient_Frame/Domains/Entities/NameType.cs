@@ -17,8 +17,10 @@ namespace RBTB_WindowsClient_Frame.Domains.Entities
 		URL_ServiceAccount,
 		[EnumMember( Value = "URL_Binance" )]
 		URL_Binance,
+        [EnumMember(Value = "URL_Bybit")]
+        URL_Bybit,
 
-		[EnumMember( Value = "ApiKey" )]
+        [EnumMember( Value = "ApiKey" )]
 		ApiKey,
 		[EnumMember( Value = "SecretKey" )]
 		SecretKey,

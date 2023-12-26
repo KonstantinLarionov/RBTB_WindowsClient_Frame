@@ -6,6 +6,7 @@ using RestSharp;
 using System;
 using System.Threading.Tasks;
 using System.Net.Http;
+using Org.BouncyCastle.Ocsp;
 
 namespace RBTB_WindowsClient.Integrations.Bybit.BybitExtensions;
 public static class BybitHelpers
@@ -39,6 +40,12 @@ public static class BybitHelpers
     internal static string SendRestRequest<T>(BybitMapper.Requests.IRequestContent message, RestClient restClient)
     {
         var request = new RestRequest(message.Query, GetHttpMethodRestSharp(message.Method));
+
+        if (message.Body != null)
+        {
+            request.RequestFormat = DataFormat.Json;
+            request.AddJsonBody(message.Body);
+        }
         if (message.Headers != null)
         {
             foreach (var header in message.Headers)

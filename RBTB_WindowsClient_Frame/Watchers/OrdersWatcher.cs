@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using BinanceMapper.Spot.MarketWS.Events;
+﻿using System.Collections.Generic;
 using BinanceMapper.Spot.UserStream;
 using BinanceMapper.Spot.UserStream.Data;
 using BinanceMapper.Spot.UserStream.Events;
@@ -41,17 +35,14 @@ namespace RBTB_WindowsClient_Frame.Watchers
 
 		private void _socket_OnClose( object sender, CloseEventArgs e )
 		{
-			//throw new NotImplementedException();
 		}
 
 		private void _socket_OnError( object sender, ErrorEventArgs e )
 		{
-			//throw new NotImplementedException();
 		}
 
 		private void _socket_OnMessage( object sender, MessageEventArgs e )
 		{
-			DefaultPublicSpotEvent base_event = null;
 			DefaultEvent def_event = null;
 
 			try
