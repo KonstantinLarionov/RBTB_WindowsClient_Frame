@@ -10,6 +10,10 @@ using BybitMapper.UTA.MarketStreamsV5.Data.Enums;
 using BybitMapper.UTA.RestV5.Data.Enums;
 using System;
 using System.IO;
+using BybitMapper.UTA.UserStreamsV5.Subscriptions;
+using BybitMapper.UTA.UserStreamsV5.Events;
+using BybitMapper.UTA.UserStreamsV5.Data.Enums;
+using System.Text;
 
 namespace RBTB_WindowsClient.Integrations.Bybit;
 public class BybitWebSocket
@@ -26,7 +30,7 @@ public class BybitWebSocket
     public event TickHandler TickEvent;
     public delegate void TradesHandler(TradeEvent tradesEvent);
     public event TradesHandler TradeEvent;
-    public delegate void ExecHandler(BaseEvent exec);
+    public delegate void ExecHandler(BybitMapper.UTA.UserStreamsV5.Events.BaseEvent exec);
     public event ExecHandler ExecEvent;
     public delegate void UserHandler(BybitMapper.UTA.UserStreamsV5.Events.BaseEvent exec);
     public event UserHandler UserEvent;
@@ -36,6 +40,12 @@ public class BybitWebSocket
     public event ErrorHandler ErrorEvent;
     public delegate void CloseHandler(object sender, CloseEventArgs e);
     public event CloseHandler CloseEvent;
+    public delegate void PositionHandler(PositionEvent e);
+    public event PositionHandler PositionEvent;
+    public delegate void OrderHandler(OrderEvent orderEvent);
+    public event OrderHandler OrderEvent;
+    public delegate void ExecutionHandler(ExecutionEvent executionEvent);
+    public event ExecutionHandler ExecutionEvent;
 
     private static JsonSerializerOptions jsonSerializerOptions = new()
     {
@@ -44,7 +54,11 @@ public class BybitWebSocket
 
     public BybitWebSocket(string url)
     {
-        _socket = new WebSocket(url);
+        _socket = new WebSocket(url)
+        {
+            EmitOnPing = true
+        };
+        _socket.SslConfiguration.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12;
         MarketStreams = new MarketStreamsHandlerCompositionV5(new MarketStreamsHandlerFactoryV5());
         UserStreams = new UserStreamsHandlerCompositionV5(new UserStreamsHandlerFactoryV5());
     }
@@ -82,22 +96,22 @@ public class BybitWebSocket
 
         if (baseEvent != null)
         {
-            if (baseEvent.WSEventType == EventType.Orderbook)
+            if (baseEvent.WSEventType == BybitMapper.UTA.MarketStreamsV5.Data.Enums.EventType.Orderbook)
             {
                 var data = Deserialize<OrderbookEvent>(e.RawData)!;
                 DepthEvent?.Invoke(data);
             }
-            else if (baseEvent.WSEventType == EventType.Tickers)
+            else if (baseEvent.WSEventType == BybitMapper.UTA.MarketStreamsV5.Data.Enums.EventType.Tickers)
             {
                 var data = Deserialize<TickerEvent>(e.RawData)!;
                 TickEvent?.Invoke(data);
             }
-            else if (baseEvent.WSEventType == EventType.Trade)
+            else if (baseEvent.WSEventType == BybitMapper.UTA.MarketStreamsV5.Data.Enums.EventType.Trade)
             {
                 var data = Deserialize<TradeEvent>(e.RawData)!;
                 TradeEvent?.Invoke(data);
             }
-            else if (baseEvent.WSEventType == EventType.Kline)
+            else if (baseEvent.WSEventType == BybitMapper.UTA.MarketStreamsV5.Data.Enums.EventType.Kline)
             {
                 var data = Deserialize<KlineEvent>(e.RawData)!;
                 KlineEvent?.Invoke(data);
@@ -111,6 +125,21 @@ public class BybitWebSocket
                 var useEvent = UserStreams.HandleDefaultEvent(e.Data);
                 ExecEvent?.Equals(useEvent);
             }
+            else if (defaultEvent.WSEventType == BybitMapper.UTA.UserStreamsV5.Data.Enums.EventType.Position)
+            {
+                var userEventData = UserStreams.HandlePositionEvent(e.Data);
+                PositionEvent.Invoke(userEventData);
+            }
+            else if (defaultEvent.WSEventType == BybitMapper.UTA.UserStreamsV5.Data.Enums.EventType.Order)
+            {
+                var userEventData = UserStreams.HandleOrderEvent(e.Data);
+                OrderEvent.Invoke(userEventData);
+            }
+            else if (defaultEvent.WSEventType == BybitMapper.UTA.UserStreamsV5.Data.Enums.EventType.Execution)
+            {
+                var userEventData = UserStreams.HandleExecutionEvent(e.Data);
+                ExecutionEvent.Invoke(userEventData);
+            }
         }
     }
 
@@ -118,8 +147,24 @@ public class BybitWebSocket
         IntervalType intervalType = IntervalType.Unrecognized)
     {
         var request = BybitMapper.UTA.MarketStreamsV5.Subscriptions.CombineStreamsSubsV5.Create(symbol, endpointType,
-            SubType.Subscribe, intervalType);
+           BybitMapper.UTA.MarketStreamsV5.Data.Enums.SubType.Subscribe, intervalType);
         _socket.Send(request);
+    }
+
+    public void PrivateSubscribe(PrivateEndpointType endpointType, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType subType)
+    {
+        var request = CombineStreamsSubsV5.Create(endpointType, subType);
+        _socket.Send(request);
+    }
+    public void PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType subType, string api, string secret, long timestamp)
+    {
+        var request = CombineStreamsSubsV5.Create(subType, api, secret, timestamp);
+        _socket.Send(request);
+    }
+
+    public void Ping()
+    {
+        _socket.Send(Encoding.UTF8.GetBytes("ping"));
     }
 
     public void Start()

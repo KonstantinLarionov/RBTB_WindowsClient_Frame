@@ -1,21 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
 using LiveCharts;
 using LiveCharts.Wpf;
-
 using RBTB_WindowsClient_Frame.Domains;
 using RBTB_WindowsClient_Frame.Integrations.MyNamespace;
 
@@ -42,8 +31,8 @@ namespace RBTB_WindowsClient_Frame.Controls
 		private async void Button_Click( object sender, RoutedEventArgs e )
 		{
 			DateTime? dateTo = dateEnd.SelectedDate.HasValue ? dateEnd.SelectedDate.Value.AddDays(1) : null;
-			var result = await _accountClient.WalletsAsync(userId,currency.Text, dateStart.SelectedDate, dateTo, "Binance");
-			if ( result != null && result.Data.Count != 0 )
+			var result = await _accountClient.WalletsAsync(userId,currency.Text, dateStart.SelectedDate, dateTo, "Bybit");
+			if ( result != null && result.Data != null && result.Data.Count != 0 )
 			{
 				var points = result.Data
 					.Select( x => new WalletPoint( x.DateOfRecording, x.Balance ) )

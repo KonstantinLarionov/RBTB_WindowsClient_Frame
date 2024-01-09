@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -10,14 +9,14 @@ using BinanceMapper.Requests;
 using Microsoft.Win32;
 using RBTB_WindowsClient.Integrations;
 using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
-using RBTB_ServiceAccount.Client.Client;
 using RBTB_WindowsClient_Frame.Controls;
-using RBTB_WindowsClient_Frame.Integrations.MyNamespace;
 using RBTB_WindowsClient_Frame.Database;
 using RBTB_WindowsClient_Frame.Domains.Entities;
-using BybitMapper.UTA.RestV5.Data.Enums;
 using RBTB_WindowsClient.Integrations.Bybit;
-
+using BybitMapper.UTA.UserStreamsV5.Events;
+using BybitMapper.UTA.RestV5.Data.Enums;
+using RBTB_WindowsClient_Frame.Integrations.MyNamespace;
+using RBTB_WindowsClient_Frame.Helpers;
 namespace RBTB_WindowsClient_Frame;
 
 /// <summary>
@@ -29,22 +28,21 @@ public partial class MainWindow : Window
     private BybitRestClient _bybitRestClient;
     private TelegramClient _telegramRestClient;
     private AccountClient _accountClient;
+    private BybitWebSocket _bybitWebSocketPrivate;
+    private Timer _pingSender;
 
     private MainContext _mainContext;
     public static Dictionary<NameType, Option> _urls = new Dictionary<NameType, Option>();
 
     //private Guid userId = new Guid( "cf955f5a-c14c-4040-b439-38cf5736119f" ); //КО
-    private Guid userId = new Guid("16348742-ccc1-4c02-9abb-8c973763b982"); //CА
+    private Guid userId = new Guid("d9e07124-3813-4394-8628-f8d450f5f75b"); //CА
     private decimal Volume;
     private bool IsTrading = true;
     private decimal TicksOut;
     private List<decimal> UseLevels = new List<decimal>();
     private Thread MainTask = null;
-    private bool OrderHave = false;
-
     private WalletControl walletControl;
     private OptionsControl optionsControl;
-
 
     public MainWindow()
     {
@@ -56,15 +54,17 @@ public partial class MainWindow : Window
 				{ NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://188.186.238.120:5246"  } },
 				{ NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://188.186.238.120:5249" } },
 				{ NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } },
-                { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api-testnet.bybit.com"  } }
+                { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.bybit.com"  } },
+                { NameType.URL_BybitWs, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "wss://stream.bybit.com/v5/private"  } }
 			};
 #elif Debug
         _urls = new Dictionary<NameType, Option>()
         {
             { NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://localhost:5246"  } },
-            { NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://188.186.238.120:5249" } },
+            { NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "https://localhost:7157" } },
             { NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } },
-            { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api-testnet.bybit.com"  } }
+            { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api-testnet.bybit.com"  } },
+            { NameType.URL_BybitWs, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "wss://stream-testnet.bybit.com/v5/private"  } }
         };
 #else
 			_urls = new Dictionary<NameType, Option>()
@@ -72,22 +72,38 @@ public partial class MainWindow : Window
 				{ NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://192.168.90.213:5246"  } },
 				{ NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://192.168.90.213:5249" } },
 				{ NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } },
-                { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api-testnet.bybit.com"  } }
+                { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.bybit.com"  } },
+                { NameType.URL_BybitWs, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "wss://stream.bybit.com/v5/private"  } }
 			};
 #endif
 
         _mainContext = new MainContext();
         _mainContext.Database.CreateIfNotExists();
-
-        _accountClient = new AccountClient(_urls[NameType.URL_ServiceAccount].ValueString, new System.Net.Http.HttpClient());
-
-        walletControl = new WalletControl(userId, _accountClient);
-
         optionsControl = new OptionsControl(_mainContext);
         main_space.Children.Add(optionsControl);
         options.Foreground = new SolidColorBrush(Colors.Gray);
 
+        _accountClient = new AccountClient(_urls[NameType.URL_ServiceAccount].ValueString, new System.Net.Http.HttpClient());
         _telegramRestClient = new TelegramClient();
+        _bybitRestClient = new BybitRestClient(_urls[NameType.URL_Bybit].ValueString, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey);
+        _bybitRestClient.Log += Log;
+
+        walletControl = new WalletControl(userId, _accountClient);
+
+        _bybitWebSocketPrivate = new BybitWebSocket(_urls[NameType.URL_BybitWs].ValueString);
+        _bybitWebSocketPrivate.PositionEvent += LogPosition;
+        _bybitWebSocketPrivate.ErrorEvent += SocketError;
+        _bybitWebSocketPrivate.OrderEvent += SaveOrder;
+        _bybitWebSocketPrivate.ExecutionEvent += SaveExecution;
+        _bybitWebSocketPrivate.Start();
+
+        var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + 10000;
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Auth, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey, timestamp);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Position, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Order, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Execution, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+
+        _pingSender = new Timer((_) => _bybitWebSocketPrivate.Ping(), null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
 
         Log("Включение робота загрузка настроек..");
         optionsControl.logger.Document.LineHeight = 2;
@@ -96,15 +112,71 @@ public partial class MainWindow : Window
         Log("Робот готов к работе.");
     }
 
+    private void LogPosition(PositionEvent position)
+    {
+        Log($"update position: {position.Data[0].Category} {position.Data[0].PositionStatus}");
+    }
+    private void SocketError(object sender, Exception ex)
+    {
+        Log($"Socket error: {ex.Message} \n {ex.StackTrace}");
+        Log($"Попытка переподключения...");
+
+        _bybitWebSocketPrivate.Start();
+
+        var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + 10000;
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Auth, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey, timestamp);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Position, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Order, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+    }
+    private async void SaveOrder(OrderEvent orderEvent)
+    {
+        if (orderEvent.Data[0] == null)
+        {
+            return;
+        }
+
+        var order = new CreateTradeRequest()
+        {
+            UserId = userId,
+            Symbol = orderEvent.Data[0].Symbol,
+            CreatedDate = DateTime.Now,
+            OrderStatus = EnumHelper.ToEnum<OrderStatus>(orderEvent.Data[0].OrderStatus),
+            Count = orderEvent.Data.Count,
+            Side = EnumHelper.ToEnum<Side>(orderEvent.Data[0].Side),
+            OrderType = EnumHelper.ToEnum<Integrations.MyNamespace.OrderType>(orderEvent.Data[0].OrderType),
+            TimeInForce = EnumHelper.ToEnum<TimeInForce>(orderEvent.Data[0].TimeInForce),
+            Price = (double)orderEvent.Data[0].Price
+        };
+
+        var createOrder = await _accountClient.Create2Async(order);
+
+        if (orderEvent.Data[0].OrderStatusEnum == OrderStatusType.New || orderEvent.Data[0].OrderStatusEnum == OrderStatusType.PartiallyFilledCanceled)
+        {
+            await _accountClient.CreateAsync(new CreatePositionRequest()
+            {
+                Count = order.Count,
+                CreatedDate = DateTime.Now,
+                Symbol = order.Symbol,
+                Price = order.Price,
+                UserId = userId,
+                TradesId = createOrder.Data,
+                Side = order.Side,
+                PositionStatus = PositionStatus.Normal
+            });
+        }
+    }
+
+    private void SaveExecution(ExecutionEvent executionEvent)
+    {
+        Log($"экзекуция: {executionEvent.Data[0].Category}  {executionEvent.Data[0].ExecValue}");
+    }
+
     private void MainTaskTrading()
     {
         Thread.Sleep(1000);
 
         var ra = new RequestArranger(optionsControl.Model.ApiKey, optionsControl.Model.SecretKey);
         ra.ActualityWindow = 10000;
-
-        _bybitRestClient = new BybitRestClient(_urls[NameType.URL_Bybit].ValueString, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey);
-        _bybitRestClient.Log += Log;
 
         _wsStrategyService = new WsClientStrategyService();
 
@@ -148,7 +220,7 @@ public partial class MainWindow : Window
                 }
             }
 
-            _accountClient.Create4Async(new CreateWalletRequest() { UserId = userId, Symbol = "USDT", Balance = Convert.ToDouble(usdt_balance), Market = "Binance" });
+            _accountClient.Create4Async(new CreateWalletRequest() { UserId = userId, Symbol = "USDT", Balance = Convert.ToDouble(usdt_balance), Market = "Bybit", DateOfRecording = DateTime.Now });
 
             Log("Баланс USDT: " + usdt_balance.ToString());
         }
@@ -175,7 +247,6 @@ public partial class MainWindow : Window
         if (UseLevels.Contains(level))
             return;
 
-        //Log($"Найдена ситуация для торговли\r\nУровень: {level}, Цена: {price}, Инструмент: {symbol}");
         var openedOrders = _bybitRestClient.RequestGetCurrentlyOpenedOrderes(symbol);
         if (openedOrders != null)
         {
@@ -198,7 +269,10 @@ public partial class MainWindow : Window
             BuyMarketSellLimit(price, symbol, level);
         }
         else
-        { Log("Автоматическая торговля запрещена.."); }
+        {
+            Log("Автоматическая торговля запрещена..");
+        }
+
         UseLevels.Add(level);
         Thread.Sleep(5000);
     }
@@ -245,21 +319,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private string GetPrivateRsa(string path)
-    {
-        string temp = string.Empty;
-        using (StreamReader fs = new StreamReader(path))
-        {
-            string line;
-            while ((line = fs.ReadLine()) != null)
-            {
-                temp += line + Environment.NewLine;
-            }
-        }
-
-        return temp;
-    }
-
     private void ButtonBase_OnClick2(object sender, RoutedEventArgs e)
     {
         OpenFileDialog ofd = new OpenFileDialog();
@@ -298,7 +357,6 @@ public partial class MainWindow : Window
             MainTask.Abort();
             MainTask = null;
         }
-
     }
 
     private void Button_Click_1(object sender, RoutedEventArgs e)

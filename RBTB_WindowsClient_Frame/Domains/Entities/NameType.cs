@@ -19,6 +19,8 @@ namespace RBTB_WindowsClient_Frame.Domains.Entities
 		URL_Binance,
         [EnumMember(Value = "URL_Bybit")]
         URL_Bybit,
+        [EnumMember(Value = "URL_BybitWs")]
+        URL_BybitWs,
 
         [EnumMember( Value = "ApiKey" )]
 		ApiKey,

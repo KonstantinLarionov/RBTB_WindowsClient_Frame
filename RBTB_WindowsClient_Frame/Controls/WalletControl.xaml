@@ -26,8 +26,8 @@
 				</materialDesign:Card>
 				<DataGrid Name="dg_wallet" Margin="10,0,10,10" AutoGenerateColumns="False">
 					<DataGrid.Columns>
-						<DataGridTextColumn Header="Дата" Binding="{Binding DateTime}"/>
-						<DataGridTextColumn Header="Значение" Binding="{Binding Value}"/>
+                        <DataGridTextColumn Header="Дата" IsReadOnly="True" Binding="{Binding DateTime}"/>
+                        <DataGridTextColumn Header="Значение" IsReadOnly="True" Binding="{Binding Value}"/>
 					</DataGrid.Columns>
 				</DataGrid>
 			</DockPanel>

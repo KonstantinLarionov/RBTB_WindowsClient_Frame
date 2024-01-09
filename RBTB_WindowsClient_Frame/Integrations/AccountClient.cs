@@ -2109,7 +2109,10 @@ namespace RBTB_WindowsClient_Frame.Integrations
 			[Newtonsoft.Json.JsonProperty( "market", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore )]
 			public string Market { get; set; }
 
-		}
+            [Newtonsoft.Json.JsonProperty("dateOfRecording", NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+            public System.DateTime? DateOfRecording { get; set; }
+
+        }
 
 		[System.CodeDom.Compiler.GeneratedCode( "NJsonSchema", "13.19.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v11.0.0.0))" )]
 		public partial class CreateWalletResponse
