@@ -44,6 +44,7 @@ public partial class MainWindow : Window
     private WalletControl walletControl;
     private OptionsControl optionsControl;
 
+    private int _counterReconnect = 5;
     public MainWindow()
     {
 
@@ -61,7 +62,7 @@ public partial class MainWindow : Window
         _urls = new Dictionary<NameType, Option>()
         {
             { NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://localhost:5246"  } },
-            { NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "https://localhost:7157" } },
+            { NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://localhost:5249" } },
             { NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } },
             { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api-testnet.bybit.com"  } },
             { NameType.URL_BybitWs, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "wss://stream-testnet.bybit.com/v5/private"  } }
@@ -118,8 +119,13 @@ public partial class MainWindow : Window
     }
     private void SocketError(object sender, Exception ex)
     {
+        _counterReconnect--;
+        if (_counterReconnect <= 0)
+            return;
+        
         Log($"Socket error: {ex.Message} \n {ex.StackTrace}");
         Log($"Попытка переподключения...");
+        
 
         _bybitWebSocketPrivate.Start();
 
@@ -127,6 +133,8 @@ public partial class MainWindow : Window
         _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Auth, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey, timestamp);
         _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Position, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
         _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Order, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+
+        
     }
     private async void SaveOrder(OrderEvent orderEvent)
     {
@@ -148,21 +156,38 @@ public partial class MainWindow : Window
             Price = (double)orderEvent.Data[0].Price
         };
 
-        var createOrder = await _accountClient.Create2Async(order);
+        CreateTradeResponse createOrder;
+        try
+        {
+            createOrder = await _accountClient.Create2Async(order);
+        }
+        catch (Exception ex)
+        {
+            Log($"Ошибка сохранения информации об ордере: {ex.Message}");
+            return;
+        }
 
         if (orderEvent.Data[0].OrderStatusEnum == OrderStatusType.New || orderEvent.Data[0].OrderStatusEnum == OrderStatusType.PartiallyFilledCanceled)
         {
-            await _accountClient.CreateAsync(new CreatePositionRequest()
+            try
             {
-                Count = order.Count,
-                CreatedDate = DateTime.Now,
-                Symbol = order.Symbol,
-                Price = order.Price,
-                UserId = userId,
-                TradesId = createOrder.Data,
-                Side = order.Side,
-                PositionStatus = PositionStatus.Normal
-            });
+                await _accountClient.CreateAsync(new CreatePositionRequest()
+                {
+                    Count = order.Count,
+                    CreatedDate = DateTime.Now,
+                    Symbol = order.Symbol,
+                    Price = order.Price,
+                    UserId = userId,
+                    TradesId = createOrder.Data,
+                    Side = order.Side,
+                    PositionStatus = PositionStatus.Normal
+                });
+            }
+            catch (Exception ex)
+            {
+                Log($"Ошибка сохранения информации о позиции: {ex.Message}");
+                return;
+            }
         }
     }
 
@@ -219,8 +244,15 @@ public partial class MainWindow : Window
                     usdt_balance += item.WalletBalance ?? item.WalletBalance * price ?? 0;
                 }
             }
-
-            _accountClient.Create4Async(new CreateWalletRequest() { UserId = userId, Symbol = "USDT", Balance = Convert.ToDouble(usdt_balance), Market = "Bybit", DateOfRecording = DateTime.Now });
+            try
+            {
+                _accountClient.Create4Async(new CreateWalletRequest() { UserId = userId, Symbol = "USDT", Balance = Convert.ToDouble(usdt_balance), Market = "Bybit", DateOfRecording = DateTime.Now });
+            }
+            catch (Exception ex)
+            {
+                Log($"Ошибка обновления баланса кошелька: {ex.Message}");
+                return;
+            }
 
             Log("Баланс USDT: " + usdt_balance.ToString());
         }

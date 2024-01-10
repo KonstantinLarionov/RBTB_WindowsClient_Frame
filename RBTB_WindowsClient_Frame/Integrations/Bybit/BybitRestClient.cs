@@ -79,7 +79,18 @@ public class BybitRestClient
         var request = new GetOrderbookRequest(category, symbol);
         var message = BybitHelpers.SendRestRequest<GetOrderbookResponse>(_arranger.Arrange(request), _restClient);
        
-        var response = _RESTHandlers.HandleGetOrderbookResponse(message);
+        GetOrderbookResponse response;
+        try
+        {
+            response = _RESTHandlers.HandleGetOrderbookResponse(message);
+        }
+        catch (Exception ex)
+        {
+            OnLogEx(new Exception(message: $"Ошибка запроса книги ордеров: {ex.Message}"));
+
+            return null;
+        }
+
         if (response == null)
         {
             OnLogEx(new NullReferenceException(message: nameof(KlineResult)));
@@ -104,7 +115,18 @@ public class BybitRestClient
         };
         var message = BybitHelpers.SendRestRequest<GetKlineResponse>(_arranger.Arrange(request), _restClient);
 
-        var response = _RESTHandlers.HandleGetKlineResponse(message);
+        GetKlineResponse response;
+        try
+        {
+            response = _RESTHandlers.HandleGetKlineResponse(message);
+        }
+        catch (Exception ex)
+        {
+            OnLogEx(new Exception(message: $"Ошибка запроса kline: {ex.Message}"));
+
+            return null;
+        }
+        
         if (response == null)
         {
             OnLogEx(new NullReferenceException(message: nameof(KlineResult)));
@@ -124,7 +146,18 @@ public class BybitRestClient
         var request = new ServerTimeRequest();
         var message = BybitHelpers.SendRestRequest<ServerTimeResponse>(_arranger.Arrange(request), _restClient);
 
-        var response = _RESTHandlers.HandleServerTimeResponse(message);
+        ServerTimeResponse response;
+        try
+        {
+            response = _RESTHandlers.HandleServerTimeResponse(message);
+        }
+        catch (Exception ex)
+        {
+            OnLogEx(new Exception(message: $"Ошибка запроса серверного времени: {ex.Message}"));
+
+            return null;
+        }
+
         if (response == null)
         {
             OnLogEx(new NullReferenceException(message: nameof(KlineResult)));
@@ -144,13 +177,25 @@ public class BybitRestClient
         var request = new GetTickersRequest(MarketCategory.Spot) { Symbol = symbol };
         var message = BybitHelpers.SendRestRequest<GetSpotTickersInfoResponse>(_arranger.Arrange(request), _restClient);
 
-        var response = _RESTHandlers.HandleGetSpotTickersResponse(message);
+        GetSpotTickersInfoResponse response;
+        try
+        {
+            response = _RESTHandlers.HandleGetSpotTickersResponse(message);
+        }
+        catch (Exception ex)
+        {
+            OnLogEx(new Exception(message: $"Ошибка запроса тикера: {ex.Message}"));
+
+            return null;
+        }
+        
         if (response == null)
         {
             OnLogEx(new NullReferenceException(message: nameof(KlineResult)));
 
             return null;
         }
+
         if (response.RetCode != 0)
         {
             OnLogEx(new Exception(message: response.RetMsg));
@@ -167,14 +212,26 @@ public class BybitRestClient
     {
         var request = new GetWalletBalanceRequest(AccountType.Unified);
         var message = BybitHelpers.SendRestRequest<GetWalletBalanceResponse>(_arranger.Arrange(request), _restClient);
-        
-        var response = _RESTHandlers.HandleGetWalletBalanceResponse(message);
+
+        GetWalletBalanceResponse response;
+        try
+        {
+           response = _RESTHandlers.HandleGetWalletBalanceResponse(message);
+        }
+        catch (Exception exception)
+        {
+            OnLogEx(new Exception(message: $"Ошибка запроса кошелька пользователя: {exception.Message}"));
+
+            return null;
+        }
+
         if (response == null)
         {
             OnLogEx(new NullReferenceException(message: nameof(WalletBalanceResult)));
 
             return null;
         }
+
         if (response.RetCode != 0)
         {
             OnLogEx(new Exception(message: response.RetMsg));
@@ -190,13 +247,25 @@ public class BybitRestClient
         var request = new GetOpenOrdersRequest(MarketCategory.Spot, symbol);
         var message = BybitHelpers.SendRestRequest<GetOpenOrdersResponse>(_arranger.Arrange(request), _restClient);
 
-        var response = _RESTHandlers.HandleGetOpenOrdersResponse(message);
+        GetOpenOrdersResponse response;
+        try
+        {
+            response = _RESTHandlers.HandleGetOpenOrdersResponse(message);
+        }
+        catch (Exception ex)
+        {
+            OnLogEx(new Exception(message: $"Ошибка запроса открытых заказов: {ex.Message}"));
+
+            return null;
+        }
+
         if (response == null)
         {
             OnLogEx(new NullReferenceException(message: nameof(OpenOrderResult)));
 
             return null;
         }
+
         if (response.RetCode != 0)
         {
             OnLogEx(new Exception(message: response.RetMsg));
@@ -218,13 +287,25 @@ public class BybitRestClient
         var request = new PlaceOrderRequest(MarketCategory.Spot, _symbol, orderSideType, orderType, order_qty, triggerPrice) { OrderPrice = orderPrice , TimeInForce = timeInForceType };
         var message = BybitHelpers.SendRestRequest<PlaceOrderResponse>(_arranger.Arrange(request), _restClient);
 
-        var response = _RESTHandlers.HandlePlaceOrderResponse(message);
+        PlaceOrderResponse response;
+        try
+        {
+            response = _RESTHandlers.HandlePlaceOrderResponse(message);
+        }
+        catch (Exception ex)
+        {
+            OnLogEx(new Exception(message: $"Ошибка запроса размещения заказа: {ex.Message}"));
+
+            return null;
+        }
+        
         if (response == null)
         {
             OnLogEx(new NullReferenceException(message: nameof(PlaceOrderResult)));
 
             return null;
         }
+
         if (response.RetCode != 0)
         {
             OnLogEx(new Exception(message: response.RetMsg));

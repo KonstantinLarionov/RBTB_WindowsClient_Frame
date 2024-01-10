@@ -31,21 +31,30 @@ namespace RBTB_WindowsClient_Frame.Controls
 		private async void Button_Click( object sender, RoutedEventArgs e )
 		{
 			DateTime? dateTo = dateEnd.SelectedDate.HasValue ? dateEnd.SelectedDate.Value.AddDays(1) : null;
-			var result = await _accountClient.WalletsAsync(userId,currency.Text, dateStart.SelectedDate, dateTo, "Bybit");
-			if ( result != null && result.Data != null && result.Data.Count != 0 )
+			try
 			{
-				var points = result.Data
-					.Select( x => new WalletPoint( x.DateOfRecording, x.Balance ) )
-					.OrderBy( x => x.DateTimeD )
-					.ToList();
+                var result = await _accountClient.WalletsAsync(userId, currency.Text, dateStart.SelectedDate, dateTo, "Bybit");
+                if (result != null && result.Data != null && result.Data.Count != 0)
+                {
+                    var points = result.Data
+                        .Select(x => new WalletPoint(x.DateOfRecording, x.Balance))
+                        .OrderBy(x => x.DateTimeD)
+                        .ToList();
 
-				dg_wallet.ItemsSource = points;
-				BuildChartBalance( points );
-				var percent_points = new List<WalletPoint>() { new WalletPoint( points[0].DateTimeD, 0 ) };
-				percent_points.Add( new WalletPoint( DateTime.Now, ( ( points[points.Count - 1].Value / points[0].Value ) - 1 ) * 100 ) );
-				BuildChartPercent( percent_points );
+                    dg_wallet.ItemsSource = points;
+                    BuildChartBalance(points);
+                    var percent_points = new List<WalletPoint>() { new WalletPoint(points[0].DateTimeD, 0) };
+                    percent_points.Add(new WalletPoint(DateTime.Now, ((points[points.Count - 1].Value / points[0].Value) - 1) * 100));
+                    BuildChartPercent(percent_points);
+                }
+                else { MessageBox.Show("Нет данных за выбранный период"); }
+            }
+            catch (Exception ex)
+			{
+
+				MessageBox.Show($"Ошибка получения данных: {ex.Message}");
 			}
-			else { MessageBox.Show( "Нет данных за выбранный период" ); }
+			
 		}
 
 		private void BuildChartBalance( List<WalletPoint> points )
