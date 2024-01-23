@@ -14,11 +14,14 @@ using BybitMapper.UTA.UserStreamsV5.Subscriptions;
 using BybitMapper.UTA.UserStreamsV5.Events;
 using BybitMapper.UTA.UserStreamsV5.Data.Enums;
 using System.Text;
+using System.Threading;
 
 namespace RBTB_WindowsClient.Integrations.Bybit;
 public class BybitWebSocket
 {
     private WebSocket _socket;
+    private int _reconnectCounter = 40;
+    private int _WSreconnectCounter;
     internal MarketStreamsHandlerCompositionV5 MarketStreams { get; }
     internal UserStreamsHandlerCompositionV5 UserStreams { get; }
 
@@ -32,14 +35,14 @@ public class BybitWebSocket
     public event TradesHandler TradeEvent;
     public delegate void ExecHandler(BybitMapper.UTA.UserStreamsV5.Events.BaseEvent exec);
     public event ExecHandler ExecEvent;
-    public delegate void UserHandler(BybitMapper.UTA.UserStreamsV5.Events.BaseEvent exec);
-    public event UserHandler UserEvent;
     public delegate void KlineHanler(KlineEvent exec);
     public event KlineHanler KlineEvent;
-    public delegate void ErrorHandler(object sender, Exception ex);
+    public delegate void ErrorHandler(object sender, Exception ex, int countconnect = 0, bool reconnect = false);
     public event ErrorHandler ErrorEvent;
     public delegate void CloseHandler(object sender, CloseEventArgs e);
     public event CloseHandler CloseEvent;
+    public delegate void OpenHandler(object sender, EventArgs e);
+    public event OpenHandler OpenEvent;
     public delegate void PositionHandler(PositionEvent e);
     public event PositionHandler PositionEvent;
     public delegate void OrderHandler(OrderEvent orderEvent);
@@ -52,7 +55,7 @@ public class BybitWebSocket
         NumberHandling = JsonNumberHandling.AllowReadingFromString
     };
 
-    public BybitWebSocket(string url)
+    public BybitWebSocket(string url, int reconnectCounter = 40)
     {
         _socket = new WebSocket(url)
         {
@@ -61,6 +64,8 @@ public class BybitWebSocket
         _socket.SslConfiguration.EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12;
         MarketStreams = new MarketStreamsHandlerCompositionV5(new MarketStreamsHandlerFactoryV5());
         UserStreams = new UserStreamsHandlerCompositionV5(new UserStreamsHandlerFactoryV5());
+
+        _reconnectCounter = reconnectCounter;
     }
 
     private static T Deserialize<T>(byte[] message)
@@ -173,18 +178,42 @@ public class BybitWebSocket
         _socket.OnMessage += SocketOnMessage!;
         _socket.OnError += SocketOnError!;
         _socket.OnClose += SocketOnClose!;
+        _socket.OnOpen += SocketOnOpen!;
 
         _socket.Connect();
     }
 
     public void SocketOnClose(object sender, CloseEventArgs e)
     {
+        if(!e.WasClean)
+        {
+            if (!_socket.IsAlive && _WSreconnectCounter > 0)
+            {
+                _WSreconnectCounter--;
+
+                Thread.Sleep(1500);
+                _socket.Connect();
+            }
+        }
+
         CloseEvent?.Invoke(sender, e);
     }
 
     public void SocketOnError(object sender, ErrorEventArgs e)
     {
-        ErrorEvent?.Invoke(sender, e.Exception);
+        if(!_socket.IsAlive)
+        {
+            ErrorEvent?.Invoke(sender, e.Exception, _WSreconnectCounter, true);
+        }
+        else
+            ErrorEvent?.Invoke(sender, e.Exception);
+    }
+
+    public void SocketOnOpen(object sender, EventArgs e)
+    {
+        _WSreconnectCounter = _reconnectCounter;
+
+        OpenEvent?.Invoke(sender, e);
     }
 
     public void Stop()

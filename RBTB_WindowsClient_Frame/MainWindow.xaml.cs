@@ -29,13 +29,15 @@ public partial class MainWindow : Window
     private TelegramClient _telegramRestClient;
     private AccountClient _accountClient;
     private BybitWebSocket _bybitWebSocketPrivate;
-    private Timer _pingSender;
+    private Timer _pingSenderBybitSocket;
+    private Timer _pingSenderStrategyService;
 
     private MainContext _mainContext;
     public static Dictionary<NameType, Option> _urls = new Dictionary<NameType, Option>();
 
     //private Guid userId = new Guid( "cf955f5a-c14c-4040-b439-38cf5736119f" ); //КО
     private Guid userId = new Guid("d9e07124-3813-4394-8628-f8d450f5f75b"); //CА
+    //private Guid userId = new Guid("25fc40fa-7185-49b8-80df-143c969561c8"); //test
     private decimal Volume;
     private bool IsTrading = true;
     private decimal TicksOut;
@@ -44,7 +46,6 @@ public partial class MainWindow : Window
     private WalletControl walletControl;
     private OptionsControl optionsControl;
 
-    private int _counterReconnect = 5;
     public MainWindow()
     {
 
@@ -64,8 +65,8 @@ public partial class MainWindow : Window
             { NameType.URL_ServiceStrategy, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "http://localhost:5246"  } },
             { NameType.URL_ServiceAccount, new Option() { NameType = NameType.URL_ServiceAccount, ValueString = "http://localhost:5249" } },
             { NameType.URL_Binance, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.binance.com"  } },
-            { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api-testnet.bybit.com"  } },
-            { NameType.URL_BybitWs, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "wss://stream-testnet.bybit.com/v5/private"  } }
+            { NameType.URL_Bybit, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "https://api.bybit.com"  } },
+            { NameType.URL_BybitWs, new Option() { NameType = NameType.URL_ServiceStrategy, ValueString = "wss://stream.bybit.com/v5/private"  } }
         };
 #else
 			_urls = new Dictionary<NameType, Option>()
@@ -93,18 +94,15 @@ public partial class MainWindow : Window
 
         _bybitWebSocketPrivate = new BybitWebSocket(_urls[NameType.URL_BybitWs].ValueString);
         _bybitWebSocketPrivate.PositionEvent += LogPosition;
-        _bybitWebSocketPrivate.ErrorEvent += SocketError;
+        _bybitWebSocketPrivate.ErrorEvent += BybitSocketError;
         _bybitWebSocketPrivate.OrderEvent += SaveOrder;
-        _bybitWebSocketPrivate.ExecutionEvent += SaveExecution;
+        _bybitWebSocketPrivate.CloseEvent += BybitSocketClose;
+        _bybitWebSocketPrivate.OpenEvent += BybitSocketOpen;
         _bybitWebSocketPrivate.Start();
 
-        var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + 10000;
-        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Auth, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey, timestamp);
-        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Position, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
-        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Order, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
-        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Execution, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+        BybitWebSocketSubscribe();
 
-        _pingSender = new Timer((_) => _bybitWebSocketPrivate.Ping(), null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
+        _pingSenderBybitSocket = new Timer((_) => _bybitWebSocketPrivate.Ping(), null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20));
 
         Log("Включение робота загрузка настроек..");
         optionsControl.logger.Document.LineHeight = 2;
@@ -117,25 +115,7 @@ public partial class MainWindow : Window
     {
         Log($"update position: {position.Data[0].Category} {position.Data[0].PositionStatus}");
     }
-    private void SocketError(object sender, Exception ex)
-    {
-        _counterReconnect--;
-        if (_counterReconnect <= 0)
-            return;
-        
-        Log($"Socket error: {ex.Message} \n {ex.StackTrace}");
-        Log($"Попытка переподключения...");
-        
 
-        _bybitWebSocketPrivate.Start();
-
-        var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + 10000;
-        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Auth, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey, timestamp);
-        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Position, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
-        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Order, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
-
-        
-    }
     private async void SaveOrder(OrderEvent orderEvent)
     {
         if (orderEvent.Data[0] == null)
@@ -191,11 +171,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SaveExecution(ExecutionEvent executionEvent)
-    {
-        Log($"экзекуция: {executionEvent.Data[0].Category}  {executionEvent.Data[0].ExecValue}");
-    }
-
     private void MainTaskTrading()
     {
         Thread.Sleep(1000);
@@ -216,8 +191,36 @@ public partial class MainWindow : Window
         _wsStrategyService.StrategyTradeEv += WsStrategyServiceOnStrategyTradeEv;
         _wsStrategyService.ErrorEvent += WsStrategyServiceOnErrorEv;
         _wsStrategyService.OpenEvent += WsStrategyServiceOnOpenEv;
+        _wsStrategyService.CloseEvent += WsStrategyServiceOnCloseEvent;
         _wsStrategyService.SetUrlServiceStrategy(_urls[NameType.URL_ServiceStrategy].ValueString);
         _wsStrategyService.Start();
+    }
+
+    private void BuyMarketSellLimit(decimal price, string symbol, decimal level)
+    {
+        var order = _bybitRestClient.RequestPlaceOrder(symbol, OrderSideType.Buy, BybitMapper.UTA.RestV5.Data.Enums.OrderType.Market, order_qty: Volume * price);
+        if (order != null)
+        {
+            Log($"Выставлена покупка {level}");
+        }
+        else
+        {
+            Log($"Ошибка открытия ордера покупки\r\n");
+        }
+
+        var orderOut = _bybitRestClient.RequestPlaceOrder(symbol, OrderSideType.Sell,
+            BybitMapper.UTA.RestV5.Data.Enums.OrderType.Limit,
+            order_qty: Volume,
+            timeInForceType: TimeInForceType.GTC,
+            orderPrice: price + TicksOut);
+        if (orderOut != null)
+        {
+            Log($"Выставлена продажа {price + TicksOut}");
+        }
+        else
+        {
+            Log($"Ошибка открытия ордера продажи\r\n");
+        }
     }
 
     private void SaveBalanceUSDT()
@@ -259,11 +262,31 @@ public partial class MainWindow : Window
     }
 
     private async void MainWindow_OnClosing(object sender, CancelEventArgs e) => await optionsControl.SavingOptions(optionsControl);
-    private void WsStrategyServiceOnOpenEv(EventArgs e) => Log($"Успешно подключение.\r\nОжидаем ситуаций для торговли");
-    private void WsStrategyServiceOnErrorEv(ErrorEventArgs e)
+
+    #region [WebSocketStrategy]
+
+    private void WsStrategyServiceOnOpenEv(EventArgs e)
     {
-        Log($"Ошибка подключения\r\n" + e.Message);
-        _wsStrategyService.Stop();
+        Log($"Успешное подключение.\r\nОжидаем ситуаций для торговли");
+        _pingSenderStrategyService = new Timer((_) => _wsStrategyService.Ping(), null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20));
+        _wsStrategyService.Subscribe();
+    }
+
+    private void WsStrategyServiceOnCloseEvent(EventArgs e)
+    {
+        _pingSenderStrategyService = null;
+    }
+
+    private void WsStrategyServiceOnErrorEv(ErrorEventArgs e, int countconnect = 0, bool reconnect = false)
+    {
+        _pingSenderStrategyService = null;
+
+        Log($"Ошибка подключения к сервису стратегии \r\n" + e.Message);
+
+        if (reconnect)
+        {
+            Log($"Попытка переподключения к сервису стратегии {countconnect}");
+        }
     }
 
     /// <summary>
@@ -290,6 +313,7 @@ public partial class MainWindow : Window
         else
         {
             Log($"Ошибка связи с биржей. Невозможно запросить ордера.");
+
             return;
         }
 
@@ -309,45 +333,61 @@ public partial class MainWindow : Window
         Thread.Sleep(5000);
     }
 
-    private void BuyMarketSellLimit(decimal price, string symbol, decimal level)
-    {
-        var order = _bybitRestClient.RequestPlaceOrder(symbol, OrderSideType.Buy, BybitMapper.UTA.RestV5.Data.Enums.OrderType.Market, order_qty: Volume * price);
-        if (order != null)
-        {
-            Log($"Выставлена покупка {level}");
-        }
-        else
-        {
-            Log($"Ошибка открытия ордера покупки\r\n");
-        }
+    #endregion
 
-        var orderOut = _bybitRestClient.RequestPlaceOrder(symbol, OrderSideType.Sell,
-            BybitMapper.UTA.RestV5.Data.Enums.OrderType.Limit,
-            order_qty: Volume,
-            timeInForceType: TimeInForceType.GTC,
-            orderPrice: price + TicksOut);
-        if (orderOut != null)
+
+    #region [BybitSocket]
+
+    private void BybitSocketError(object sender, Exception ex, int countconnect = 0, bool reconnect = false)
+    {
+        Log($"bybit Socket error: {ex.Message}");
+        if (reconnect)
         {
-            Log($"Выставлена продажа {price + TicksOut}");
-        }
-        else
-        {
-            Log($"Ошибка открытия ордера продажи\r\n");
+            Log($"Попытка переподключения к сокету bybit {countconnect}");
+
         }
     }
+
+    private void BybitWebSocketSubscribe()
+    {
+        var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + 10000;
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Auth, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey, timestamp);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Position, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Order, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+        _bybitWebSocketPrivate.PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.PrivateEndpointType.Execution, BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType.Subscribe);
+    }
+
+    private void BybitSocketOpen(object sender, EventArgs eventArgs)
+    {
+        Log($"Успешное подключение к сокету bybit");
+
+        BybitWebSocketSubscribe();
+    }
+
+    private void BybitSocketClose(object sender, WebSocketSharp.CloseEventArgs eventArgs)
+    {
+    }
+
+    #endregion
 
     private async void Log(string text)
     {
         optionsControl.Model.Log = optionsControl.Model.Log.Insert(0, $"[{DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()}] " + text + Environment.NewLine);
-
-        var res = await _telegramRestClient.SendMessage(text, optionsControl.Model.TelegramId);
-        if (res != null)
+        try
         {
-            if (res.StatusCode == System.Net.HttpStatusCode.BadRequest || res.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+            var res = await _telegramRestClient.SendMessage(text, optionsControl.Model.TelegramId);
+            if (res != null)
             {
-                var tgtext = await res.Content.ReadAsStringAsync();
-                optionsControl.Model.Log = optionsControl.Model.Log.Insert(0, $"[{DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()}] Ошибка подключения Телеграм!\r\n{tgtext}");
+                if (res.StatusCode == System.Net.HttpStatusCode.BadRequest || res.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                {
+                    var tgtext = await res.Content.ReadAsStringAsync();
+                    optionsControl.Model.Log = optionsControl.Model.Log.Insert(0, $"[{DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()}] Ошибка подключения Телеграм!\r\n{tgtext}");
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            optionsControl.Model.Log = optionsControl.Model.Log.Insert(0, $"[{DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()}] " + ex.Message + Environment.NewLine);
         }
     }
 
@@ -388,6 +428,7 @@ public partial class MainWindow : Window
         {
             MainTask.Abort();
             MainTask = null;
+            _bybitWebSocketPrivate.Stop();
         }
     }
 
