@@ -8,6 +8,7 @@ using RBTB_WindowsClient_Frame.Database;
 using RBTB_WindowsClient_Frame.Domains;
 using RBTB_WindowsClient_Frame.Domains.Entities;
 using RBTB_WindowsClient_Frame.Helpers;
+using WebSocketSharp;
 
 namespace RBTB_WindowsClient_Frame.Controls;
 /// <summary>
@@ -78,11 +79,11 @@ public partial class OptionsControl : UserControl
 						}
 
 						if ( ( (string)textBox.Tag ).Contains( "double" ) )
-						{ db_item.ValueDouble = Convert.ToDouble( textBox.Text ); db_item.ValueType = OptionType.Double; }
+						{ db_item.ValueDouble = Convert.ToDouble( textBox.Text.IsNullOrEmpty() ? "0" : double.TryParse(textBox.Text, out double result) ? textBox.Text : "0" ); db_item.ValueType = OptionType.Double; }
 						if ( ( (string)textBox.Tag ).Contains( "string" ) )
 						{ db_item.ValueString =  textBox.Text ; db_item.ValueType = OptionType.String; }
 						if ( ( (string)textBox.Tag ).Contains( "int" ) )
-						{ db_item.ValueInt = Convert.ToInt32( textBox.Text ); db_item.ValueType = OptionType.Int; }
+						{ db_item.ValueInt = Convert.ToInt32( textBox.Text.IsNullOrEmpty() ? "0": int.TryParse(textBox.Text, out int res)? textBox.Text : "0"); db_item.ValueType = OptionType.Int; }
 						if ( ( (string)textBox.Tag ).Contains( "date" ) )
 						{ db_item.ValueDateTime = Convert.ToDateTime( textBox.Text ); db_item.ValueType = OptionType.DateTime; }
 

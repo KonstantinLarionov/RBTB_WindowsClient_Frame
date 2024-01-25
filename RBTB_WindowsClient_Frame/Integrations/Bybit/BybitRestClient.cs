@@ -43,7 +43,7 @@ public class BybitRestClient
     public BybitRestClient(string url, string api, string key)
     {
         _restClient = new(url);
-        _arranger = new RequestArranger(api, key);
+        _arranger = new RequestArranger(api ?? "api", key ?? "key");
         _RESTHandlers = new UtaHandlerCompositionV5(new UtaHandlerFactory());
     }
 

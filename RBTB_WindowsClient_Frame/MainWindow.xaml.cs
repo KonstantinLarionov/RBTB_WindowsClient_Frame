@@ -17,6 +17,7 @@ using BybitMapper.UTA.UserStreamsV5.Events;
 using BybitMapper.UTA.RestV5.Data.Enums;
 using RBTB_WindowsClient_Frame.Integrations.MyNamespace;
 using RBTB_WindowsClient_Frame.Helpers;
+using WebSocketSharp;
 namespace RBTB_WindowsClient_Frame;
 
 /// <summary>
@@ -85,24 +86,7 @@ public partial class MainWindow : Window
         main_space.Children.Add(optionsControl);
         options.Foreground = new SolidColorBrush(Colors.Gray);
 
-        _accountClient = new AccountClient(_urls[NameType.URL_ServiceAccount].ValueString, new System.Net.Http.HttpClient());
         _telegramRestClient = new TelegramClient();
-        _bybitRestClient = new BybitRestClient(_urls[NameType.URL_Bybit].ValueString, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey);
-        _bybitRestClient.Log += Log;
-
-        walletControl = new WalletControl(userId, _accountClient);
-
-        _bybitWebSocketPrivate = new BybitWebSocket(_urls[NameType.URL_BybitWs].ValueString);
-        _bybitWebSocketPrivate.PositionEvent += LogPosition;
-        _bybitWebSocketPrivate.ErrorEvent += BybitSocketError;
-        _bybitWebSocketPrivate.OrderEvent += SaveOrder;
-        _bybitWebSocketPrivate.CloseEvent += BybitSocketClose;
-        _bybitWebSocketPrivate.OpenEvent += BybitSocketOpen;
-        _bybitWebSocketPrivate.Start();
-
-        BybitWebSocketSubscribe();
-
-        _pingSenderBybitSocket = new Timer((_) => _bybitWebSocketPrivate.Ping(), null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20));
 
         Log("Включение робота загрузка настроек..");
         optionsControl.logger.Document.LineHeight = 2;
@@ -198,7 +182,7 @@ public partial class MainWindow : Window
 
     private void BuyMarketSellLimit(decimal price, string symbol, decimal level)
     {
-        var order = _bybitRestClient.RequestPlaceOrder(symbol, OrderSideType.Buy, BybitMapper.UTA.RestV5.Data.Enums.OrderType.Market, order_qty: Volume * price);
+        var order = _bybitRestClient.RequestPlaceOrder(symbol, OrderSideType.Buy, BybitMapper.UTA.RestV5.Data.Enums.OrderType.Market, order_qty: Volume * level);
         if (order != null)
         {
             Log($"Выставлена покупка {level}");
@@ -263,6 +247,57 @@ public partial class MainWindow : Window
 
     private async void MainWindow_OnClosing(object sender, CancelEventArgs e) => await optionsControl.SavingOptions(optionsControl);
 
+    private bool InitializeServices(out string message)
+    {
+        if (optionsControl.Model.ApiKey.IsNullOrEmpty() || optionsControl.Model.SecretKey.IsNullOrEmpty())
+        {
+            message = "Введите Api и Secret ключи";
+            return false;
+        }
+        else if(userId == null)
+        {
+            message = "Введите uid пользователя";
+            return false;
+        }
+        else if (optionsControl.Model.TelegramId.IsNullOrEmpty())
+        {
+            message = "Введите TelegramId пользователя";
+            return false;
+        }
+        else if (optionsControl.Model.VolumeIn.IsNullOrEmpty() || !decimal.TryParse(optionsControl.Model.VolumeIn, out decimal res))
+        {
+            message = "Введите объём входа";
+            return false;
+        }
+        else if (optionsControl.Model.PipsOut.IsNullOrEmpty() || !int.TryParse(optionsControl.Model.PipsOut, out int result))
+        {
+            message = "Введите количество пунктов для выхода";
+            return false;
+        }
+
+        _accountClient = new AccountClient(_urls[NameType.URL_ServiceAccount].ValueString, new System.Net.Http.HttpClient());
+        _telegramRestClient = new TelegramClient();
+        _bybitRestClient = new BybitRestClient(_urls[NameType.URL_Bybit].ValueString, optionsControl.Model.ApiKey, optionsControl.Model.SecretKey);
+        _bybitRestClient.Log += Log;
+
+        walletControl = new WalletControl(userId, _accountClient);
+
+        _bybitWebSocketPrivate = new BybitWebSocket(_urls[NameType.URL_BybitWs].ValueString);
+        _bybitWebSocketPrivate.PositionEvent += LogPosition;
+        _bybitWebSocketPrivate.ErrorEvent += BybitSocketError;
+        _bybitWebSocketPrivate.OrderEvent += SaveOrder;
+        _bybitWebSocketPrivate.CloseEvent += BybitSocketClose;
+        _bybitWebSocketPrivate.OpenEvent += BybitSocketOpen;
+        _bybitWebSocketPrivate.Start();
+
+        //BybitWebSocketSubscribe();
+
+        _pingSenderBybitSocket = new Timer((_) => _bybitWebSocketPrivate.Ping(), null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20));
+        
+        message = "ok";
+        return true;
+    }
+
     #region [WebSocketStrategy]
 
     private void WsStrategyServiceOnOpenEv(EventArgs e)
@@ -274,12 +309,18 @@ public partial class MainWindow : Window
 
     private void WsStrategyServiceOnCloseEvent(EventArgs e)
     {
-        _pingSenderStrategyService = null;
+        if (_pingSenderStrategyService != null)
+        {
+            _pingSenderStrategyService.Dispose();
+        }
     }
 
     private void WsStrategyServiceOnErrorEv(ErrorEventArgs e, int countconnect = 0, bool reconnect = false)
     {
-        _pingSenderStrategyService = null;
+        if (_pingSenderStrategyService != null)
+        {
+            _pingSenderStrategyService.Dispose();
+        }
 
         Log($"Ошибка подключения к сервису стратегии \r\n" + e.Message);
 
@@ -340,6 +381,11 @@ public partial class MainWindow : Window
 
     private void BybitSocketError(object sender, Exception ex, int countconnect = 0, bool reconnect = false)
     {
+        if (_pingSenderBybitSocket != null)
+        {
+            _pingSenderBybitSocket.Dispose();
+        }
+
         Log($"bybit Socket error: {ex.Message}");
         if (reconnect)
         {
@@ -366,6 +412,10 @@ public partial class MainWindow : Window
 
     private void BybitSocketClose(object sender, WebSocketSharp.CloseEventArgs eventArgs)
     {
+        if (_pingSenderBybitSocket != null)
+        {
+            _pingSenderBybitSocket.Dispose();
+        }
     }
 
     #endregion
@@ -421,6 +471,15 @@ public partial class MainWindow : Window
 
         if (MainTask == null)
         {
+            string message = "";
+
+            if(!InitializeServices(out message))
+            {
+                MessageBox.Show(message);
+
+                return;
+            }
+
             MainTask = new Thread(MainTaskTrading);
             MainTask.Start();
         }
@@ -428,7 +487,21 @@ public partial class MainWindow : Window
         {
             MainTask.Abort();
             MainTask = null;
+
+            if (_pingSenderStrategyService != null)
+            {
+                _pingSenderStrategyService.Dispose();
+            }
+
+            if (_pingSenderBybitSocket != null)
+            {
+                _pingSenderBybitSocket.Dispose();
+            }
+
+            Thread.Sleep(2000);
+
             _bybitWebSocketPrivate.Stop();
+            _wsStrategyService.Stop();
         }
     }
 

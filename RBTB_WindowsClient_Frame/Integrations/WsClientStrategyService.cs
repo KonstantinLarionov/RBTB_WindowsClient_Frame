@@ -73,7 +73,7 @@ public class WsClientStrategyService
 
     public void Ping()
     {
-        _socket.Send(Encoding.UTF8.GetBytes("ping"));
+        //_socket.Send(Encoding.UTF8.GetBytes("ping"));
     }
 
     private void _socket_OnError(object sender, ErrorEventArgs e)
@@ -88,6 +88,12 @@ public class WsClientStrategyService
 
     private void _socket_OnClose(object sender, CloseEventArgs e)
     {
+        if(e.Code == 1000)
+        {
+            CloseEvent?.Invoke(e);
+            return;
+        }
+
         if(!e.WasClean)
         {
             if(!_socket.IsAlive && _WSreconnectCounter > 0)
@@ -104,5 +110,5 @@ public class WsClientStrategyService
         CloseEvent?.Invoke(e);
     }
 
-    public void Stop() => _socket?.Close();
+    public void Stop() => _socket?.Close(1000);
 }

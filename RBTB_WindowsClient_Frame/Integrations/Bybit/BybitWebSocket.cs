@@ -163,13 +163,13 @@ public class BybitWebSocket
     }
     public void PrivateSubscribe(BybitMapper.UTA.UserStreamsV5.Data.Enums.SubType subType, string api, string secret, long timestamp)
     {
-        var request = CombineStreamsSubsV5.Create(subType, api, secret, timestamp);
+        var request = CombineStreamsSubsV5.Create(subType, api ?? "api", secret ?? "secret", timestamp);
         _socket.Send(request);
     }
 
     public void Ping()
     {
-        _socket.Send(Encoding.UTF8.GetBytes("ping"));
+        //_socket.Send(Encoding.UTF8.GetBytes("ping"));
     }
 
     public void Start()
